@@ -43,6 +43,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <sys/stat.h>
+#include <vector>
 #include <sys/mman.h>
 #include <unistd.h>
 
@@ -755,6 +757,46 @@ int main(int argc, char* argv[])
 
   // Start the log backend.
   srslog::init();
+
+  // Set up custom layer log files in the docs directory if found for the UE.
+  std::string ue_docs_dir = "";
+  for (const char* path : {"/root/internship-repo/docs", "../../../docs", "docs", "../docs", "../../docs"}) {
+    struct stat info;
+    if (stat(path, &info) == 0 && (info.st_mode & S_IFDIR) != 0) {
+      ue_docs_dir = path;
+      break;
+    }
+  }
+
+  if (!ue_docs_dir.empty()) {
+    struct ue_logger_map_t {
+      std::vector<std::string> ids;
+      std::string filename;
+    };
+    std::vector<ue_logger_map_t> log_maps = {
+      {{"PDCP", "PDCP-NR"}, "pdcp.log"},
+      {{"RLC", "RLC-NR"}, "rlc.log"},
+      {{"MAC", "MAC-NR"}, "mac.log"},
+      {{"PHY", "PHY-SA", "PHY_LIB", "PHY0", "PHY1", "PHY2", "PHY3", "PHY4", "PHY5", "PHY6", "PHY7"}, "phy.log"}
+    };
+
+    for (const auto& mapping : log_maps) {
+      std::string log_path = ue_docs_dir + "/ue_" + mapping.filename;
+      
+      // Fetch the file sink
+      auto& file_sink = srslog::fetch_file_sink(log_path);
+      
+      // Register each ID with this custom sink
+      for (const auto& id : mapping.ids) {
+        srslog::fetch_basic_logger(id, file_sink, false);
+      }
+    }
+    
+    // Create symlink for ue_pcds.log
+    std::string pcds_path = ue_docs_dir + "/ue_pcds.log";
+    if (unlink(pcds_path.c_str()) == 0) {}
+    if (symlink("ue_pdcp.log", pcds_path.c_str()) == 0) {}
+  }
 
   srslog::fetch_basic_logger("ALL").set_level(srslog::basic_levels::warning);
   srsran::log_args(argc, argv, "UE");

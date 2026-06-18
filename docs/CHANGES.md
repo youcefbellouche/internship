@@ -8,7 +8,7 @@ Each custom change has its own markdown file detailing the goal, code changes, a
 
 | ID | Date | Document | Summary |
 | :--- | :--- | :--- | :--- |
-| **01** | 2026-06-19 | [01-layer-logging.md](changes/01-layer-logging.md) | Separated gNB protocol layer logs (PDCP, RLC, MAC, PHY) into their own individual files. |
+| **01** | 2026-06-19 | [01-layer-logging.md](changes/01-layer-logging.md) | Separated gNB and UE protocol layer logs (PDCP, RLC, MAC, PHY) into their own individual files. |
 
 ---
 
