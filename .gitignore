@@ -1,5 +1,4 @@
-ocudu/build/
-srsRAN_4G/build/
-
+# Ignore all build folders anywhere in the project
+**/build/
 *.log
 *.pcap
