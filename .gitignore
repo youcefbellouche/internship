@@ -1,0 +1,5 @@
+ocudu/build/
+srsRAN_4G/build/
+
+*.log
+*.pcap
