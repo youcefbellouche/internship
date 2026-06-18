@@ -51,6 +51,7 @@
 #include "ocudu/support/versioning/version.h"
 #include "ocudu/xnap/gateways/xnc_network_gateway_factory.h"
 #include <algorithm>
+#include <filesystem>
 #include <atomic>
 #ifdef DPDK_FOUND
 #include "ocudu/hal/dpdk/dpdk_eal_factory.h"
@@ -123,6 +124,47 @@ static void register_app_logs(const gnb_appconfig&            gnb_cfg,
                               o_cu_up_application_unit&       cu_up_app_unit,
                               flexible_o_du_application_unit& du_app_unit)
 {
+  // Set up custom layer log files in the docs directory if found.
+  std::string docs_dir = "";
+  for (const char* path : {"/root/internship-repo/docs", "../../../docs", "docs", "../docs", "../../docs"}) {
+    if (std::filesystem::exists(path) && std::filesystem::is_directory(path)) {
+      docs_dir = path;
+      break;
+    }
+  }
+
+  if (!docs_dir.empty()) {
+    std::vector<std::string> layers = {"PDCP", "RLC", "MAC", "PHY"};
+    for (const auto& layer : layers) {
+      std::string layer_lower = layer;
+      std::transform(layer_lower.begin(), layer_lower.end(), layer_lower.begin(), [](char c) {
+        return (c >= 'A' && c <= 'Z') ? (c - 'A' + 'a') : c;
+      });
+      std::string log_path = docs_dir + "/" + layer_lower + ".log";
+      
+      // Fetch the file sink
+      auto& file_sink = ocudulog::fetch_file_sink(
+          log_path, 0, true, false, ocudulog::create_contextual_text_formatter());
+      
+      // Fetch basic logger with the custom sink
+      // True for print context for MAC and PHY, false for others
+      bool print_context = (layer == "MAC" || layer == "PHY");
+      ocudulog::fetch_basic_logger(layer, file_sink, print_context);
+    }
+    
+    // Create symlink for pcds.log
+    try {
+      std::filesystem::path pdcp_path = std::filesystem::path(docs_dir) / "pdcp.log";
+      std::filesystem::path pcds_path = std::filesystem::path(docs_dir) / "pcds.log";
+      if (std::filesystem::exists(pcds_path) || std::filesystem::is_symlink(pcds_path)) {
+        std::filesystem::remove(pcds_path);
+      }
+      std::filesystem::create_symlink("pdcp.log", pcds_path);
+    } catch (...) {
+      // Ignore symlink creation failure
+    }
+  }
+
   const logger_appconfig& log_cfg = gnb_cfg.log_cfg;
   // Set log-level of app and all non-layer specific components to app level.
   for (const auto& id : {"ALL", "SCTP-GW", "IO-EPOLL", "UDP-GW", "PCAP", "ASN1"}) {
