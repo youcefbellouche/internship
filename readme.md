@@ -61,7 +61,7 @@ From the root of this cloned repository, build the gNB:
 ```bash
 
 git config --global core.symlinks true
-cd ocudu
+cd project/ocudu
 mkdir build && cd build
 cmake ../
 make -j$(nproc)
@@ -70,7 +70,7 @@ cd ../../
 ### Step 5: Compile the Phone (srsRAN)
 From the root of this cloned repository, build the UE:
 ```bash
-cd srsRAN_4G
+cd project/srsRAN_4G
 mkdir build && cd build
 cmake ../
 make -j$(nproc)
@@ -89,14 +89,14 @@ tail -f /var/log/open5gs/amf.log
 #### Terminal 2: Boot the Tower (gNB)
 Start oCUDU using our custom zero-gain ZMQ configuration:
 ```bash
-cd ocudu/build
+cd project/ocudu/build
 sudo ./apps/gnb/gnb -c ../../gnb.zmq.yaml
 ```
 Wait until you see: `==== gNB started ===`
 #### Terminal 3: Boot the Phone (UE)
 Create an isolated network namespace (`ue1`) so the phone doesn't conflict with your host Windows IP, then turn it on:
 ```bash
-cd srsRAN_4G/build
+cd project/srsRAN_4G/build
 sudo ip netns add ue1
 sudo ./srsue/src/srsue ../../ue_zmq.conf
 ```
