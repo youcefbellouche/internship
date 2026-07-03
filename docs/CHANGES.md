@@ -8,7 +8,12 @@ Each custom change has its own markdown file detailing the goal, code changes, a
 
 | ID | Date | Document | Summary |
 | :--- | :--- | :--- | :--- |
+| **00** | 2026-06-16 | [00-multi-connectivity-ntn.md](changes/00-multi-connectivity-ntn.md) | Documented analysis of why multi-connectivity (MR-DC) and Non-Terrestrial Networks (NTN) are not implemented. |
 | **01** | 2026-06-19 | [01-layer-logging.md](changes/01-layer-logging.md) | Separated gNB and UE protocol layer logs (PDCP, RLC, MAC, PHY) into their own individual files. |
+| **02** | 2026-06-22 | [02-pdcp-reordering-tests.md](changes/02-pdcp-reordering-tests.md) | Implemented and verified custom tests for duplicate discarding, reordering timers, and middle server. |
+| **03** | 2026-06-23 | [README.md](phase-2-test/README.md) | Generated execution logs for PDCP RX tests and analyzed results, duplicate logging, and async logger buffering artifacts. |
+
+
 
 ---
 

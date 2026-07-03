@@ -1,0 +1,176 @@
+Note: Google Test filter = pdcp_rx_stormbrain_test.TestD_MiddleServerImplementation
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from pdcp_rx_stormbrain_test
+[ RUN      ] pdcp_rx_stormbrain_test.TestD_MiddleServerImplementation
+2026-06-30T09:42:05.051866 [TEST    ] [I] Creating PDCP RX (12 bit nia=2 nea=2, {na})
+2026-06-30T09:42:05.051938 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: PDCP configured. rb_type=DRB rlc_mode=AM sn_size=12 t_reordering=10 count_notify=3221225472 count_max=3489660928 warn_on_drop=false
+=====================================[ Test "Stormbrain Test D: Middle Server Simulation" ]=====================================
+2026-06-30T09:42:05.052132 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: Security configured: NIA2 (off) NEA2 (off) domain=UP
+2026-06-30T09:42:05.052133 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: 128 K_int: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:42:05.052133 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: 128 K_enc: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:42:05.052160 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: Security configured: NIA2 (on) NEA2 (on) domain=UP
+2026-06-30T09:42:05.052160 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: 128 K_int: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:42:05.052160 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: 128 K_enc: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+[Sim Time: 0 ms] [Middle Server] Intercepted Decrypted PDU from CU: Detailed PDU Structure:
+  - Type: Data PDU
+  - Sequence Number (SN): 0
+  - Header Bytes: 80 00
+  - Encrypted Payload Bytes (Length 2): 18 e2
+  - Message Authentication Code (MAC-I): 00 00 00 00
+  - Full PDU hex dump: 80 00 18 e2 00 00 00 00
+2026-06-30T09:42:05.063155 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=8
+    0000: 80 00 18 e2 00 00 00 00
+2026-06-30T09:42:05.063157 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=0 rx_deliv=0 rx_reord=0
+2026-06-30T09:42:05.063157 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=8 sn=0 count=0
+    0000: 80 00 18 e2 00 00 00 00
+[Sim Time: 0 ms] [Middle Server] Direct injected SN=0 to UE
+2026-06-30T09:42:05.063304 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=0. count=0 pdu_len=8
+2026-06-30T09:42:05.063306 [SEC     ] [D] Applying ciphering. count=0
+2026-06-30T09:42:05.063306 [SEC     ] [D] K_enc: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:42:05.063306 [SEC     ] [D] Ciphering input:
+2026-06-30T09:42:05.063307 [SEC     ] [D] Ciphering output:
+2026-06-30T09:42:05.063310 [SEC     ] [W] Integrity check failed. count=0
+2026-06-30T09:42:05.063310 [SEC     ] [W] K_int: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:42:05.063311 [SEC     ] [W] MAC-I received: 
+	72 e9 05 8f
+2026-06-30T09:42:05.063311 [SEC     ] [W] MAC-I expected: 
+	52 b2 b5 88
+2026-06-30T09:42:05.063311 [SEC     ] [W] Message input:
+2026-06-30T09:42:05.063370 [PDCP    ] [W] [     0.0] ue=0 DRB1 UL: Integrity failed, dropping PDU. count=0
+[Sim Time: 1 ms] [Middle Server] Intercepted Decrypted PDU from CU: Detailed PDU Structure:
+  - Type: Data PDU
+  - Sequence Number (SN): 1
+  - Header Bytes: 80 01
+  - Encrypted Payload Bytes (Length 2): 18 e2
+  - Message Authentication Code (MAC-I): 00 00 00 00
+  - Full PDU hex dump: 80 01 18 e2 00 00 00 00
+[Sim Time: 1 ms] [Middle Server] Direct injected SN=1 to UE
+2026-06-30T09:42:05.064484 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=8
+    0000: 80 01 18 e2 00 00 00 00
+2026-06-30T09:42:05.064485 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=0 rx_deliv=0 rx_reord=0
+2026-06-30T09:42:05.064485 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=8 sn=1 count=1
+    0000: 80 01 18 e2 00 00 00 00
+2026-06-30T09:42:05.064514 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=0. count=1 pdu_len=8
+2026-06-30T09:42:05.064516 [SEC     ] [D] Applying ciphering. count=1
+2026-06-30T09:42:05.064516 [SEC     ] [D] K_enc: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:42:05.064516 [SEC     ] [D] Ciphering input:
+2026-06-30T09:42:05.064517 [SEC     ] [D] Ciphering output:
+2026-06-30T09:42:05.064520 [SEC     ] [W] Integrity check failed. count=1
+2026-06-30T09:42:05.064520 [SEC     ] [W] K_int: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:42:05.064520 [SEC     ] [W] MAC-I received: 
+	2a 7c 12 0c
+2026-06-30T09:42:05.064520 [SEC     ] [W] MAC-I expected: 
+	41 39 f5 64
+2026-06-30T09:42:05.064520 [SEC     ] [W] Message input:
+2026-06-30T09:42:05.064553 [PDCP    ] [W] [     0.0] ue=0 DRB1 UL: Integrity failed, dropping PDU. count=1
+[Sim Time: 2 ms] [Middle Server] Intercepted Decrypted PDU from CU: Detailed PDU Structure:
+  - Type: Data PDU
+  - Sequence Number (SN): 2
+  - Header Bytes: 80 02
+  - Encrypted Payload Bytes (Length 2): 18 e2
+  - Message Authentication Code (MAC-I): 00 00 00 00
+  - Full PDU hex dump: 80 02 18 e2 00 00 00 00
+2026-06-30T09:42:05.065623 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=8
+    0000: 80 02 18 e2 00 00 00 00
+2026-06-30T09:42:05.065624 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=0 rx_deliv=0 rx_reord=0
+2026-06-30T09:42:05.065624 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=8 sn=2 count=2
+    0000: 80 02 18 e2 00 00 00 00
+2026-06-30T09:42:05.065653 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=1. count=2 pdu_len=8
+2026-06-30T09:42:05.065654 [SEC     ] [D] Applying ciphering. count=2
+2026-06-30T09:42:05.065654 [SEC     ] [D] K_enc: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:42:05.065654 [SEC     ] [D] Ciphering input:
+2026-06-30T09:42:05.065655 [SEC     ] [D] Ciphering output:
+2026-06-30T09:42:05.065656 [SEC     ] [W] Integrity check failed. count=2
+2026-06-30T09:42:05.065657 [SEC     ] [W] K_int: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:42:05.065657 [SEC     ] [W] MAC-I received: 
+	e9 a7 9d f1
+2026-06-30T09:42:05.065657 [SEC     ] [W] MAC-I expected: 
+	57 b6 8a 90
+2026-06-30T09:42:05.065657 [SEC     ] [W] Message input:
+[Sim Time: 2 ms] [Middle Server] Direct injected SN=2 to UE
+2026-06-30T09:42:05.065739 [PDCP    ] [W] [     0.0] ue=0 DRB1 UL: Integrity failed, dropping PDU. count=2
+[Sim Time: 3 ms] Waiting 1000ms for duplicate injections...
+[Sim Time: 1000 ms] [Middle Server] 1-second delay expired. Injecting duplicate PDU to UE for SN=0
+2026-06-30T09:42:06.137352 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=8
+    0000: 80 00 18 e2 00 00 00 00
+2026-06-30T09:42:06.137358 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=0 rx_deliv=0 rx_reord=0
+2026-06-30T09:42:06.137360 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=8 sn=0 count=0
+    0000: 80 00 18 e2 00 00 00 00
+2026-06-30T09:42:06.137419 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=1. count=0 pdu_len=8
+2026-06-30T09:42:06.137421 [SEC     ] [D] Applying ciphering. count=0
+2026-06-30T09:42:06.137422 [SEC     ] [D] K_enc: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:42:06.137423 [SEC     ] [D] Ciphering input:
+2026-06-30T09:42:06.137425 [SEC     ] [D] Ciphering output:
+2026-06-30T09:42:06.137432 [SEC     ] [W] Integrity check failed. count=0
+2026-06-30T09:42:06.137433 [SEC     ] [W] K_int: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:42:06.137434 [SEC     ] [W] MAC-I received: 
+	72 e9 05 8f
+2026-06-30T09:42:06.137434 [SEC     ] [W] MAC-I expected: 
+	52 b2 b5 88
+2026-06-30T09:42:06.137435 [SEC     ] [W] Message input:
+2026-06-30T09:42:06.137802 [PDCP    ] [W] [     0.0] ue=0 DRB1 UL: Integrity failed, dropping PDU. count=0
+[Sim Time: 1001 ms] [Middle Server] 1-second delay expired. Injecting duplicate PDU to UE for SN=1
+2026-06-30T09:42:06.138954 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=8
+    0000: 80 01 18 e2 00 00 00 00
+2026-06-30T09:42:06.138959 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=0 rx_deliv=0 rx_reord=0
+2026-06-30T09:42:06.138960 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=8 sn=1 count=1
+    0000: 80 01 18 e2 00 00 00 00
+2026-06-30T09:42:06.139008 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=0. count=1 pdu_len=8
+2026-06-30T09:42:06.139011 [SEC     ] [D] Applying ciphering. count=1
+2026-06-30T09:42:06.139011 [SEC     ] [D] K_enc: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:42:06.139012 [SEC     ] [D] Ciphering input:
+2026-06-30T09:42:06.139014 [SEC     ] [D] Ciphering output:
+2026-06-30T09:42:06.139019 [SEC     ] [W] Integrity check failed. count=1
+2026-06-30T09:42:06.139021 [SEC     ] [W] K_int: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:42:06.139021 [SEC     ] [W] MAC-I received: 
+	2a 7c 12 0c
+2026-06-30T09:42:06.139022 [SEC     ] [W] MAC-I expected: 
+	41 39 f5 64
+2026-06-30T09:42:06.139022 [SEC     ] [W] Message input:
+2026-06-30T09:42:06.139525 [PDCP    ] [W] [     0.0] ue=0 DRB1 UL: Integrity failed, dropping PDU. count=1
+[Sim Time: 1002 ms] [Middle Server] 1-second delay expired. Injecting duplicate PDU to UE for SN=2
+2026-06-30T09:42:06.140638 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=8
+    0000: 80 02 18 e2 00 00 00 00
+2026-06-30T09:42:06.140671 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=0 rx_deliv=0 rx_reord=0
+2026-06-30T09:42:06.140672 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=8 sn=2 count=2
+    0000: 80 02 18 e2 00 00 00 00
+2026-06-30T09:42:06.140719 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=1. count=2 pdu_len=8
+2026-06-30T09:42:06.140722 [SEC     ] [D] Applying ciphering. count=2
+2026-06-30T09:42:06.140723 [SEC     ] [D] K_enc: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:42:06.140724 [SEC     ] [D] Ciphering input:
+2026-06-30T09:42:06.140726 [SEC     ] [D] Ciphering output:
+2026-06-30T09:42:06.140731 [SEC     ] [W] Integrity check failed. count=2
+2026-06-30T09:42:06.140732 [SEC     ] [W] K_int: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:42:06.140732 [SEC     ] [W] MAC-I received: 
+	e9 a7 9d f1
+2026-06-30T09:42:06.140733 [SEC     ] [W] MAC-I expected: 
+	57 b6 8a 90
+2026-06-30T09:42:06.140733 [SEC     ] [W] Message input:
+2026-06-30T09:42:06.140855 [PDCP    ] [W] [     0.0] ue=0 DRB1 UL: Integrity failed, dropping PDU. count=2
+================================================================================================================================
+2026-06-30T09:42:06.143936 [ALL     ] [I] Task worker "crypto#0" finished.
+2026-06-30T09:42:06.143937 [ALL     ] [I] Task worker "crypto#1" finished.
+2026-06-30T09:42:06.143946 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Stopped PDCP entity
+[       OK ] pdcp_rx_stormbrain_test.TestD_MiddleServerImplementation (1094 ms)
+[----------] 1 test from pdcp_rx_stormbrain_test (1094 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (1094 ms total)
+[  PASSED  ] 1 test.

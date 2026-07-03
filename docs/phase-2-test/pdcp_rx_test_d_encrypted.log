@@ -1,0 +1,185 @@
+Note: Google Test filter = pdcp_rx_stormbrain_test.TestD_MiddleServerImplementation
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from pdcp_rx_stormbrain_test
+[ RUN      ] pdcp_rx_stormbrain_test.TestD_MiddleServerImplementation
+2026-06-30T09:36:44.867637 [TEST    ] [I] Creating PDCP RX (12 bit nia=2 nea=2, {na})
+2026-06-30T09:36:44.867690 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: PDCP configured. rb_type=DRB rlc_mode=AM sn_size=12 t_reordering=10 count_notify=3221225472 count_max=3489660928 warn_on_drop=false
+=====================================[ Test "Stormbrain Test D: Middle Server Simulation" ]=====================================
+2026-06-30T09:36:44.867862 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: Security configured: NIA2 (off) NEA2 (off) domain=UP
+2026-06-30T09:36:44.867862 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: 128 K_int: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:36:44.867863 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: 128 K_enc: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:36:44.867880 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: Security configured: NIA2 (on) NEA2 (on) domain=UP
+2026-06-30T09:36:44.867880 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: 128 K_int: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:36:44.867881 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: 128 K_enc: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+[Sim Time: 0 ms] [Middle Server] Intercepted PDU from CU: Detailed PDU Structure:
+  - Type: Data PDU
+  - Sequence Number (SN): 0
+  - Header Bytes: 80 00
+  - Encrypted Payload Bytes (Length 2): d9 50
+  - Message Authentication Code (MAC-I): 8a e3 e7 06
+  - Full PDU hex dump: 80 00 d9 50 8a e3 e7 06
+2026-06-30T09:36:44.878883 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=8
+    0000: 80 00 d9 50 8a e3 e7 06
+2026-06-30T09:36:44.878885 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=0 rx_deliv=0 rx_reord=0
+2026-06-30T09:36:44.878886 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=8 sn=0 count=0
+    0000: 80 00 d9 50 8a e3 e7 06
+2026-06-30T09:36:44.878970 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=0. count=0 pdu_len=8
+2026-06-30T09:36:44.878973 [SEC     ] [D] Applying ciphering. count=0
+2026-06-30T09:36:44.878973 [SEC     ] [D] K_enc: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:36:44.878974 [SEC     ] [D] Ciphering input:
+2026-06-30T09:36:44.878975 [SEC     ] [D] Ciphering output:
+2026-06-30T09:36:44.878979 [SEC     ] [D] Integrity check passed. count=0
+2026-06-30T09:36:44.878980 [SEC     ] [D] K_int: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:36:44.878980 [SEC     ] [D] MAC-I: 
+	f8 0a e2 89
+2026-06-30T09:36:44.878980 [SEC     ] [D] Message input:
+2026-06-30T09:36:44.878981 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=0 verified=true
+    0000: 80 00 18 e2
+[Sim Time: 0 ms] [Middle Server] Direct injected SN=0 to UE
+2026-06-30T09:36:44.879062 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=0 to window.
+2026-06-30T09:36:44.879063 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=0
+2026-06-30T09:36:44.879064 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=0 from window
+2026-06-30T09:36:44.879064 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=1 rx_deliv=1 rx_reord=0
+[Sim Time: 1 ms] [Middle Server] Intercepted PDU from CU: Detailed PDU Structure:
+  - Type: Data PDU
+  - Sequence Number (SN): 1
+  - Header Bytes: 80 01
+  - Encrypted Payload Bytes (Length 2): 9e fe
+  - Message Authentication Code (MAC-I): ef 99 50 a5
+  - Full PDU hex dump: 80 01 9e fe ef 99 50 a5
+2026-06-30T09:36:44.880147 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=8
+    0000: 80 01 9e fe ef 99 50 a5
+2026-06-30T09:36:44.880148 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=1 rx_deliv=1 rx_reord=0
+2026-06-30T09:36:44.880148 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=8 sn=1 count=1
+    0000: 80 01 9e fe ef 99 50 a5
+[Sim Time: 1 ms] [Middle Server] Direct injected SN=1 to UE
+2026-06-30T09:36:44.880276 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=1. count=1 pdu_len=8
+2026-06-30T09:36:44.880277 [SEC     ] [D] Applying ciphering. count=1
+2026-06-30T09:36:44.880278 [SEC     ] [D] K_enc: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:36:44.880278 [SEC     ] [D] Ciphering input:
+2026-06-30T09:36:44.880278 [SEC     ] [D] Ciphering output:
+2026-06-30T09:36:44.880280 [SEC     ] [D] Integrity check passed. count=1
+2026-06-30T09:36:44.880281 [SEC     ] [D] K_int: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:36:44.880281 [SEC     ] [D] MAC-I: 
+	c5 e5 42 a9
+2026-06-30T09:36:44.880281 [SEC     ] [D] Message input:
+2026-06-30T09:36:44.880282 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=1 verified=true
+    0000: 80 01 18 e2
+2026-06-30T09:36:44.880324 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=1 to window.
+2026-06-30T09:36:44.880324 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=1
+2026-06-30T09:36:44.880325 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=1 from window
+2026-06-30T09:36:44.880325 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=2 rx_deliv=2 rx_reord=0
+[Sim Time: 2 ms] [Middle Server] Intercepted PDU from CU: Detailed PDU Structure:
+  - Type: Data PDU
+  - Sequence Number (SN): 2
+  - Header Bytes: 80 02
+  - Encrypted Payload Bytes (Length 2): 7c ab
+  - Message Authentication Code (MAC-I): 1a 84 fb 88
+  - Full PDU hex dump: 80 02 7c ab 1a 84 fb 88
+[Sim Time: 2 ms] [Middle Server] Direct injected SN=2 to UE
+2026-06-30T09:36:44.881448 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=8
+    0000: 80 02 7c ab 1a 84 fb 88
+2026-06-30T09:36:44.881449 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=2 rx_deliv=2 rx_reord=0
+2026-06-30T09:36:44.881449 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=8 sn=2 count=2
+    0000: 80 02 7c ab 1a 84 fb 88
+2026-06-30T09:36:44.881457 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=0. count=2 pdu_len=8
+2026-06-30T09:36:44.881458 [SEC     ] [D] Applying ciphering. count=2
+2026-06-30T09:36:44.881459 [SEC     ] [D] K_enc: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:36:44.881459 [SEC     ] [D] Ciphering input:
+2026-06-30T09:36:44.881459 [SEC     ] [D] Ciphering output:
+2026-06-30T09:36:44.881461 [SEC     ] [D] Integrity check passed. count=2
+2026-06-30T09:36:44.881461 [SEC     ] [D] K_int: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:36:44.881462 [SEC     ] [D] MAC-I: 
+	f3 23 66 79
+2026-06-30T09:36:44.881462 [SEC     ] [D] Message input:
+2026-06-30T09:36:44.881462 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=2 verified=true
+    0000: 80 02 18 e2
+2026-06-30T09:36:44.881496 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=2 to window.
+2026-06-30T09:36:44.881496 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=2
+2026-06-30T09:36:44.881497 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=2 from window
+2026-06-30T09:36:44.881497 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=3 rx_deliv=3 rx_reord=0
+[Sim Time: 3 ms] Waiting 1000ms for duplicate injections...
+[Sim Time: 1000 ms] [Middle Server] 1-second delay expired. Injecting duplicate PDU to UE for SN=0
+2026-06-30T09:36:45.956552 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=8
+    0000: 80 00 d9 50 8a e3 e7 06
+2026-06-30T09:36:45.956555 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=3 rx_deliv=3 rx_reord=0
+2026-06-30T09:36:45.956556 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=8 sn=0 count=0
+    0000: 80 00 d9 50 8a e3 e7 06
+2026-06-30T09:36:45.956591 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=0. count=0 pdu_len=8
+2026-06-30T09:36:45.956592 [SEC     ] [D] Applying ciphering. count=0
+2026-06-30T09:36:45.956592 [SEC     ] [D] K_enc: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:36:45.956593 [SEC     ] [D] Ciphering input:
+2026-06-30T09:36:45.956594 [SEC     ] [D] Ciphering output:
+2026-06-30T09:36:45.956596 [SEC     ] [D] Integrity check passed. count=0
+2026-06-30T09:36:45.956597 [SEC     ] [D] K_int: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:36:45.956597 [SEC     ] [D] MAC-I: 
+	f8 0a e2 89
+2026-06-30T09:36:45.956597 [SEC     ] [D] Message input:
+2026-06-30T09:36:45.956598 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=0 verified=true
+    0000: 80 00 18 e2
+2026-06-30T09:36:45.956672 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Out-of-order after timeout, duplicate or count wrap-around. count=0 rx_next=3 rx_deliv=3 rx_reord=0
+[Sim Time: 1001 ms] [Middle Server] 1-second delay expired. Injecting duplicate PDU to UE for SN=1
+2026-06-30T09:36:45.957741 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=8
+    0000: 80 01 9e fe ef 99 50 a5
+2026-06-30T09:36:45.957743 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=3 rx_deliv=3 rx_reord=0
+2026-06-30T09:36:45.957743 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=8 sn=1 count=1
+    0000: 80 01 9e fe ef 99 50 a5
+2026-06-30T09:36:45.957772 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=1. count=1 pdu_len=8
+2026-06-30T09:36:45.957773 [SEC     ] [D] Applying ciphering. count=1
+2026-06-30T09:36:45.957773 [SEC     ] [D] K_enc: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:36:45.957773 [SEC     ] [D] Ciphering input:
+2026-06-30T09:36:45.957774 [SEC     ] [D] Ciphering output:
+2026-06-30T09:36:45.957776 [SEC     ] [D] Integrity check passed. count=1
+2026-06-30T09:36:45.957776 [SEC     ] [D] K_int: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:36:45.957777 [SEC     ] [D] MAC-I: 
+	c5 e5 42 a9
+2026-06-30T09:36:45.957777 [SEC     ] [D] Message input:
+2026-06-30T09:36:45.957777 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=1 verified=true
+    0000: 80 01 18 e2
+2026-06-30T09:36:45.957822 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Out-of-order after timeout, duplicate or count wrap-around. count=1 rx_next=3 rx_deliv=3 rx_reord=0
+[Sim Time: 1002 ms] [Middle Server] 1-second delay expired. Injecting duplicate PDU to UE for SN=2
+2026-06-30T09:36:45.958893 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=8
+    0000: 80 02 7c ab 1a 84 fb 88
+2026-06-30T09:36:45.958895 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=3 rx_deliv=3 rx_reord=0
+2026-06-30T09:36:45.958895 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=8 sn=2 count=2
+    0000: 80 02 7c ab 1a 84 fb 88
+2026-06-30T09:36:45.958945 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=1. count=2 pdu_len=8
+2026-06-30T09:36:45.958946 [SEC     ] [D] Applying ciphering. count=2
+2026-06-30T09:36:45.958946 [SEC     ] [D] K_enc: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:36:45.958946 [SEC     ] [D] Ciphering input:
+2026-06-30T09:36:45.958947 [SEC     ] [D] Ciphering output:
+2026-06-30T09:36:45.958948 [SEC     ] [D] Integrity check passed. count=2
+2026-06-30T09:36:45.958948 [SEC     ] [D] K_int: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-30T09:36:45.958949 [SEC     ] [D] MAC-I: 
+	f3 23 66 79
+2026-06-30T09:36:45.958949 [SEC     ] [D] Message input:
+2026-06-30T09:36:45.958949 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=2 verified=true
+    0000: 80 02 18 e2
+2026-06-30T09:36:45.959015 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Out-of-order after timeout, duplicate or count wrap-around. count=2 rx_next=3 rx_deliv=3 rx_reord=0
+================================================================================================================================
+2026-06-30T09:36:45.961647 [ALL     ] [I] Task worker "crypto#0" finished.
+2026-06-30T09:36:45.961730 [ALL     ] [I] Task worker "crypto#1" finished.
+2026-06-30T09:36:45.961734 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Stopped PDCP entity
+[       OK ] pdcp_rx_stormbrain_test.TestD_MiddleServerImplementation (1095 ms)
+[----------] 1 test from pdcp_rx_stormbrain_test (1095 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (1095 ms total)
+[  PASSED  ] 1 test.

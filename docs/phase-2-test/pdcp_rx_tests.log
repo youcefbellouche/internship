@@ -1,0 +1,392 @@
+Note: Google Test filter = pdcp_rx_stormbrain_test.*
+[==========] Running 4 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 4 tests from pdcp_rx_stormbrain_test
+[ RUN      ] pdcp_rx_stormbrain_test.TestA_DuplicatedScenario
+2026-06-23T22:10:13.727433 [TEST    ] [I] Creating PDCP RX (12 bit nia=2 nea=2, {na})
+2026-06-23T22:10:13.727482 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: PDCP configured. rb_type=DRB rlc_mode=AM sn_size=12 t_reordering=10 count_notify=3221225472 count_max=3489660928 warn_on_drop=false
+=======================================[ Test "Stormbrain Test A: Duplicated Scenario" ]========================================
+2026-06-23T22:10:13.727656 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: Security configured: NIA2 (off) NEA2 (off) domain=UP
+2026-06-23T22:10:13.727656 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: 128 K_int: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-23T22:10:13.727656 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: 128 K_enc: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-23T22:10:13.737058 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 01 18 e2
+2026-06-23T22:10:13.737060 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=1 rx_deliv=1 rx_reord=0
+2026-06-23T22:10:13.737061 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=1 count=1
+    0000: 80 01 18 e2
+2026-06-23T22:10:13.737127 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=0. count=1 pdu_len=4
+2026-06-23T22:10:13.737128 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=1 verified=false
+    0000: 80 01 18 e2
+2026-06-23T22:10:13.737214 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=1 to window.
+2026-06-23T22:10:13.737215 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=1
+2026-06-23T22:10:13.737216 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=1 from window
+2026-06-23T22:10:13.737216 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=2 rx_deliv=2 rx_reord=0
+2026-06-23T22:10:13.737217 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 02 18 e2
+2026-06-23T22:10:13.737218 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=2 rx_deliv=2 rx_reord=0
+2026-06-23T22:10:13.737218 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=2 count=2
+    0000: 80 02 18 e2
+2026-06-23T22:10:13.737369 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=1. count=2 pdu_len=4
+2026-06-23T22:10:13.737369 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=2 verified=false
+    0000: 80 02 18 e2
+2026-06-23T22:10:13.737432 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=2 to window.
+2026-06-23T22:10:13.737432 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=2
+2026-06-23T22:10:13.737433 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=2 from window
+2026-06-23T22:10:13.737433 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=3 rx_deliv=3 rx_reord=0
+2026-06-23T22:10:13.737434 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 02 18 e2
+2026-06-23T22:10:13.737435 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=3 rx_deliv=3 rx_reord=0
+2026-06-23T22:10:13.737435 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=2 count=2
+    0000: 80 02 18 e2
+2026-06-23T22:10:13.737570 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=0. count=2 pdu_len=4
+2026-06-23T22:10:13.737570 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=2 verified=false
+    0000: 80 02 18 e2
+2026-06-23T22:10:13.737614 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Out-of-order after timeout, duplicate or count wrap-around. count=2 rx_next=3 rx_deliv=3 rx_reord=0
+2026-06-23T22:10:13.737615 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 03 18 e2
+2026-06-23T22:10:13.737616 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=3 rx_deliv=3 rx_reord=0
+2026-06-23T22:10:13.737616 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=3 count=3
+    0000: 80 03 18 e2
+2026-06-23T22:10:13.737750 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=1. count=3 pdu_len=4
+2026-06-23T22:10:13.737751 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=3 verified=false
+    0000: 80 03 18 e2
+2026-06-23T22:10:13.737785 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=3 to window.
+2026-06-23T22:10:13.737785 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=3
+2026-06-23T22:10:13.737786 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=3 from window
+2026-06-23T22:10:13.737786 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=4 rx_deliv=4 rx_reord=0
+2026-06-23T22:10:13.737786 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 04 18 e2
+2026-06-23T22:10:13.737787 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=4 rx_deliv=4 rx_reord=0
+2026-06-23T22:10:13.737787 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=4 count=4
+    0000: 80 04 18 e2
+2026-06-23T22:10:13.737924 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=0. count=4 pdu_len=4
+2026-06-23T22:10:13.737925 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=4 verified=false
+    0000: 80 04 18 e2
+2026-06-23T22:10:13.737961 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=4 to window.
+2026-06-23T22:10:13.737961 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=4
+2026-06-23T22:10:13.737962 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=4 from window
+2026-06-23T22:10:13.737962 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=5 rx_deliv=5 rx_reord=0
+================================================================================================================================
+2026-06-23T22:10:13.738486 [ALL     ] [I] Task worker "crypto#0" finished.
+2026-06-23T22:10:13.738488 [ALL     ] [I] Task worker "crypto#1" finished.
+2026-06-23T22:10:13.738497 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Stopped PDCP entity
+[       OK ] pdcp_rx_stormbrain_test.TestA_DuplicatedScenario (12 ms)
+[ RUN      ] pdcp_rx_stormbrain_test.TestB_PlayingWithTReordering
+2026-06-23T22:10:13.738985 [TEST    ] [I] Creating PDCP RX (12 bit nia=2 nea=2, {na})
+2026-06-23T22:10:13.738998 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: PDCP configured. rb_type=DRB rlc_mode=AM sn_size=12 t_reordering=10 count_notify=3221225472 count_max=3489660928 warn_on_drop=false
+====================================[ Test "Stormbrain Test B: Playing with t-Reordering" ]=====================================
+2026-06-23T22:10:13.739176 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: Security configured: NIA2 (off) NEA2 (off) domain=UP
+2026-06-23T22:10:13.739176 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: 128 K_int: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-23T22:10:13.739177 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: 128 K_enc: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-23T22:10:13.739179 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 01 18 e2
+2026-06-23T22:10:13.739180 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=1 rx_deliv=1 rx_reord=0
+2026-06-23T22:10:13.739180 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=1 count=1
+    0000: 80 01 18 e2
+2026-06-23T22:10:13.739294 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=0. count=1 pdu_len=4
+2026-06-23T22:10:13.739294 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=1 verified=false
+    0000: 80 01 18 e2
+2026-06-23T22:10:13.739348 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=1 to window.
+2026-06-23T22:10:13.739349 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=1
+2026-06-23T22:10:13.739349 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=1 from window
+2026-06-23T22:10:13.739350 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=2 rx_deliv=2 rx_reord=0
+2026-06-23T22:10:13.739351 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 03 18 e2
+2026-06-23T22:10:13.739351 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=2 rx_deliv=2 rx_reord=0
+2026-06-23T22:10:13.739352 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=3 count=3
+    0000: 80 03 18 e2
+2026-06-23T22:10:13.739489 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=1. count=3 pdu_len=4
+2026-06-23T22:10:13.739489 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=3 verified=false
+    0000: 80 03 18 e2
+2026-06-23T22:10:13.739529 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=3 to window.
+2026-06-23T22:10:13.739529 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Started t-Reordering.
+2026-06-23T22:10:13.739530 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=4 rx_deliv=2 rx_reord=4
+2026-06-23T22:10:13.739532 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: Reordering timer expired. rx_next=4 rx_deliv=2 rx_reord=4
+2026-06-23T22:10:13.739532 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=3
+2026-06-23T22:10:13.739533 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=3 from window
+2026-06-23T22:10:13.739533 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=4 rx_deliv=4 rx_reord=4
+2026-06-23T22:10:13.739533 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 05 18 e2
+2026-06-23T22:10:13.739534 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=4 rx_deliv=4 rx_reord=4
+2026-06-23T22:10:13.739534 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=5 count=5
+    0000: 80 05 18 e2
+2026-06-23T22:10:13.739671 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=0. count=5 pdu_len=4
+2026-06-23T22:10:13.739671 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=5 verified=false
+    0000: 80 05 18 e2
+2026-06-23T22:10:13.739710 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=5 to window.
+2026-06-23T22:10:13.739710 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Started t-Reordering.
+2026-06-23T22:10:13.739710 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=6 rx_deliv=4 rx_reord=6
+2026-06-23T22:10:13.739711 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 05 18 e2
+2026-06-23T22:10:13.739711 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=6 rx_deliv=4 rx_reord=6
+2026-06-23T22:10:13.739712 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=5 count=5
+    0000: 80 05 18 e2
+2026-06-23T22:10:13.739849 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=1. count=5 pdu_len=4
+2026-06-23T22:10:13.739850 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=5 verified=false
+    0000: 80 05 18 e2
+2026-06-23T22:10:13.739890 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Duplicate PDU dropped. count=5
+2026-06-23T22:10:13.739890 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 03 18 e2
+2026-06-23T22:10:13.739891 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=6 rx_deliv=4 rx_reord=6
+2026-06-23T22:10:13.739891 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=3 count=3
+    0000: 80 03 18 e2
+2026-06-23T22:10:13.740031 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=0. count=3 pdu_len=4
+2026-06-23T22:10:13.740031 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=3 verified=false
+    0000: 80 03 18 e2
+2026-06-23T22:10:13.740069 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Out-of-order after timeout, duplicate or count wrap-around. count=3 rx_next=6 rx_deliv=4 rx_reord=6
+2026-06-23T22:10:13.740069 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 02 18 e2
+2026-06-23T22:10:13.740070 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=6 rx_deliv=4 rx_reord=6
+2026-06-23T22:10:13.740070 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=2 count=2
+    0000: 80 02 18 e2
+2026-06-23T22:10:13.740248 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=1. count=2 pdu_len=4
+2026-06-23T22:10:13.740248 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=2 verified=false
+    0000: 80 02 18 e2
+2026-06-23T22:10:13.740312 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Out-of-order after timeout, duplicate or count wrap-around. count=2 rx_next=6 rx_deliv=4 rx_reord=6
+2026-06-23T22:10:13.740314 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: Reordering timer expired. rx_next=6 rx_deliv=4 rx_reord=6
+2026-06-23T22:10:13.740314 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=5
+2026-06-23T22:10:13.740315 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=5 from window
+2026-06-23T22:10:13.740315 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=6 rx_deliv=6 rx_reord=6
+================================================================================================================================
+2026-06-23T22:10:13.740747 [ALL     ] [I] Task worker "crypto#0" finished.
+2026-06-23T22:10:13.740800 [ALL     ] [I] Task worker "crypto#1" finished.
+2026-06-23T22:10:13.740803 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Stopped PDCP entity
+[       OK ] pdcp_rx_stormbrain_test.TestB_PlayingWithTReordering (2 ms)
+[ RUN      ] pdcp_rx_stormbrain_test.TestC_ComplexTReorderingBehavior
+2026-06-23T22:10:13.740979 [TEST    ] [I] Creating PDCP RX (12 bit nia=2 nea=2, {na})
+2026-06-23T22:10:13.741001 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: PDCP configured. rb_type=DRB rlc_mode=AM sn_size=12 t_reordering=10 count_notify=3221225472 count_max=3489660928 warn_on_drop=false
+==================================[ Test "Stormbrain Test C: Complex t-Reordering Behavior" ]===================================
+2026-06-23T22:10:13.741189 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: Security configured: NIA2 (off) NEA2 (off) domain=UP
+2026-06-23T22:10:13.741189 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: 128 K_int: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-23T22:10:13.741189 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: 128 K_enc: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-23T22:10:13.741192 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 01 18 e2
+2026-06-23T22:10:13.741199 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=1 rx_deliv=1 rx_reord=0
+2026-06-23T22:10:13.741199 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=1 count=1
+    0000: 80 01 18 e2
+2026-06-23T22:10:13.741293 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=0. count=1 pdu_len=4
+2026-06-23T22:10:13.741294 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=1 verified=false
+    0000: 80 01 18 e2
+2026-06-23T22:10:13.741350 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=1 to window.
+2026-06-23T22:10:13.741351 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=1
+2026-06-23T22:10:13.741351 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=1 from window
+2026-06-23T22:10:13.741352 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=2 rx_deliv=2 rx_reord=0
+2026-06-23T22:10:13.741352 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 02 18 e2
+2026-06-23T22:10:13.741353 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=2 rx_deliv=2 rx_reord=0
+2026-06-23T22:10:13.741353 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=2 count=2
+    0000: 80 02 18 e2
+2026-06-23T22:10:13.741490 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=1. count=2 pdu_len=4
+2026-06-23T22:10:13.741491 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=2 verified=false
+    0000: 80 02 18 e2
+2026-06-23T22:10:13.741534 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=2 to window.
+2026-06-23T22:10:13.741534 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=2
+2026-06-23T22:10:13.741535 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=2 from window
+2026-06-23T22:10:13.741535 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=3 rx_deliv=3 rx_reord=0
+2026-06-23T22:10:13.741535 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 03 18 e2
+2026-06-23T22:10:13.741536 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=3 rx_deliv=3 rx_reord=0
+2026-06-23T22:10:13.741536 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=3 count=3
+    0000: 80 03 18 e2
+2026-06-23T22:10:13.741671 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=0. count=3 pdu_len=4
+2026-06-23T22:10:13.741671 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=3 verified=false
+    0000: 80 03 18 e2
+2026-06-23T22:10:13.741714 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=3 to window.
+2026-06-23T22:10:13.741715 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=3
+2026-06-23T22:10:13.741715 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=3 from window
+2026-06-23T22:10:13.741715 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=4 rx_deliv=4 rx_reord=0
+2026-06-23T22:10:13.741716 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 08 18 e2
+2026-06-23T22:10:13.741717 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=4 rx_deliv=4 rx_reord=0
+2026-06-23T22:10:13.741717 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=8 count=8
+    0000: 80 08 18 e2
+2026-06-23T22:10:13.741852 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=1. count=8 pdu_len=4
+2026-06-23T22:10:13.741852 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=8 verified=false
+    0000: 80 08 18 e2
+2026-06-23T22:10:13.741899 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=8 to window.
+2026-06-23T22:10:13.741899 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Started t-Reordering.
+2026-06-23T22:10:13.741899 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=9 rx_deliv=4 rx_reord=9
+2026-06-23T22:10:13.741900 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 04 18 e2
+2026-06-23T22:10:13.741901 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=9 rx_deliv=4 rx_reord=9
+2026-06-23T22:10:13.741901 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=4 count=4
+    0000: 80 04 18 e2
+2026-06-23T22:10:13.742033 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=0. count=4 pdu_len=4
+2026-06-23T22:10:13.742034 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=4 verified=false
+    0000: 80 04 18 e2
+2026-06-23T22:10:13.742072 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=4 to window.
+2026-06-23T22:10:13.742072 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=4
+2026-06-23T22:10:13.742072 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=4 from window
+2026-06-23T22:10:13.742072 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=9 rx_deliv=5 rx_reord=9
+2026-06-23T22:10:13.742073 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 06 18 e2
+2026-06-23T22:10:13.742073 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=9 rx_deliv=5 rx_reord=9
+2026-06-23T22:10:13.742074 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=6 count=6
+    0000: 80 06 18 e2
+2026-06-23T22:10:13.742224 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=1. count=6 pdu_len=4
+2026-06-23T22:10:13.742225 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=6 verified=false
+    0000: 80 06 18 e2
+2026-06-23T22:10:13.742258 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=6 to window.
+2026-06-23T22:10:13.742258 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=9 rx_deliv=5 rx_reord=9
+2026-06-23T22:10:13.742259 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 09 18 e2
+2026-06-23T22:10:13.742259 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=9 rx_deliv=5 rx_reord=9
+2026-06-23T22:10:13.742260 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=9 count=9
+    0000: 80 09 18 e2
+2026-06-23T22:10:13.742399 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=0. count=9 pdu_len=4
+2026-06-23T22:10:13.742399 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=9 verified=false
+    0000: 80 09 18 e2
+2026-06-23T22:10:13.742441 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=9 to window.
+2026-06-23T22:10:13.742441 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=10 rx_deliv=5 rx_reord=9
+2026-06-23T22:10:13.742442 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 0a 18 e2
+2026-06-23T22:10:13.742443 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=10 rx_deliv=5 rx_reord=9
+2026-06-23T22:10:13.742443 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=10 count=10
+    0000: 80 0a 18 e2
+2026-06-23T22:10:13.742578 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=1. count=10 pdu_len=4
+2026-06-23T22:10:13.742579 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=10 verified=false
+    0000: 80 0a 18 e2
+2026-06-23T22:10:13.742623 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=10 to window.
+2026-06-23T22:10:13.742623 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=11 rx_deliv=5 rx_reord=9
+2026-06-23T22:10:13.742624 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 0c 18 e2
+2026-06-23T22:10:13.742624 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=11 rx_deliv=5 rx_reord=9
+2026-06-23T22:10:13.742624 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=12 count=12
+    0000: 80 0c 18 e2
+2026-06-23T22:10:13.742774 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=0. count=12 pdu_len=4
+2026-06-23T22:10:13.742775 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=12 verified=false
+    0000: 80 0c 18 e2
+2026-06-23T22:10:13.742804 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=12 to window.
+2026-06-23T22:10:13.742804 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=13 rx_deliv=5 rx_reord=9
+2026-06-23T22:10:13.742806 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: Reordering timer expired. rx_next=13 rx_deliv=5 rx_reord=9
+2026-06-23T22:10:13.742807 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=6
+2026-06-23T22:10:13.742807 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=6 from window
+2026-06-23T22:10:13.742807 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=8
+2026-06-23T22:10:13.742807 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=8 from window
+2026-06-23T22:10:13.742807 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=9
+2026-06-23T22:10:13.742807 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=9 from window
+2026-06-23T22:10:13.742807 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=10
+2026-06-23T22:10:13.742808 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=10 from window
+2026-06-23T22:10:13.742808 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=13 rx_deliv=11 rx_reord=9
+2026-06-23T22:10:13.742808 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Updating rx_reord to rx_next. rx_next=13 rx_deliv=11 rx_reord=9
+2026-06-23T22:10:13.742808 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 0e 18 e2
+2026-06-23T22:10:13.742809 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=13 rx_deliv=11 rx_reord=13
+2026-06-23T22:10:13.742809 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=14 count=14
+    0000: 80 0e 18 e2
+2026-06-23T22:10:13.742948 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=1. count=14 pdu_len=4
+2026-06-23T22:10:13.742948 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=14 verified=false
+    0000: 80 0e 18 e2
+2026-06-23T22:10:13.742985 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=14 to window.
+2026-06-23T22:10:13.742985 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=15 rx_deliv=11 rx_reord=13
+2026-06-23T22:10:13.742985 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 0d 18 e2
+2026-06-23T22:10:13.742986 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=15 rx_deliv=11 rx_reord=13
+2026-06-23T22:10:13.742986 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=13 count=13
+    0000: 80 0d 18 e2
+2026-06-23T22:10:13.743128 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=0. count=13 pdu_len=4
+2026-06-23T22:10:13.743128 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=13 verified=false
+    0000: 80 0d 18 e2
+2026-06-23T22:10:13.743175 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=13 to window.
+2026-06-23T22:10:13.743175 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=15 rx_deliv=11 rx_reord=13
+2026-06-23T22:10:13.743176 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 0b 18 e2
+2026-06-23T22:10:13.743176 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=15 rx_deliv=11 rx_reord=13
+2026-06-23T22:10:13.743176 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=11 count=11
+    0000: 80 0b 18 e2
+2026-06-23T22:10:13.743308 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=1. count=11 pdu_len=4
+2026-06-23T22:10:13.743308 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=11 verified=false
+    0000: 80 0b 18 e2
+2026-06-23T22:10:13.743357 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=11 to window.
+2026-06-23T22:10:13.743357 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=11
+2026-06-23T22:10:13.743357 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=11 from window
+2026-06-23T22:10:13.743357 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=12
+2026-06-23T22:10:13.743358 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=12 from window
+2026-06-23T22:10:13.743358 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=13
+2026-06-23T22:10:13.743358 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=13 from window
+2026-06-23T22:10:13.743358 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=14
+2026-06-23T22:10:13.743358 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=14 from window
+2026-06-23T22:10:13.743358 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Stopped t-Reordering.
+2026-06-23T22:10:13.743358 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=15 rx_deliv=15 rx_reord=13
+2026-06-23T22:10:13.743359 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 0f 18 e2
+2026-06-23T22:10:13.743360 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=15 rx_deliv=15 rx_reord=13
+2026-06-23T22:10:13.743360 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=15 count=15
+    0000: 80 0f 18 e2
+2026-06-23T22:10:13.743497 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=0. count=15 pdu_len=4
+2026-06-23T22:10:13.743497 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=15 verified=false
+    0000: 80 0f 18 e2
+2026-06-23T22:10:13.743537 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=15 to window.
+2026-06-23T22:10:13.743538 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=15
+2026-06-23T22:10:13.743538 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=15 from window
+2026-06-23T22:10:13.743538 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=16 rx_deliv=16 rx_reord=13
+2026-06-23T22:10:13.743539 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 10 18 e2
+2026-06-23T22:10:13.743539 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=16 rx_deliv=16 rx_reord=13
+2026-06-23T22:10:13.743539 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=16 count=16
+    0000: 80 10 18 e2
+2026-06-23T22:10:13.743688 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=1. count=16 pdu_len=4
+2026-06-23T22:10:13.743689 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=16 verified=false
+    0000: 80 10 18 e2
+2026-06-23T22:10:13.743725 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=16 to window.
+2026-06-23T22:10:13.743725 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=16
+2026-06-23T22:10:13.743725 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=16 from window
+2026-06-23T22:10:13.743725 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=17 rx_deliv=17 rx_reord=13
+================================================================================================================================
+2026-06-23T22:10:13.744088 [ALL     ] [I] Task worker "crypto#0" finished.
+[       OK ] pdcp_rx_stormbrain_test.TestC_ComplexTReorderingBehavior (3 ms)
+
+
+
+[ RUN      ] pdcp_rx_stormbrain_test.TestD_MiddleServerImplementation
+2026-06-23T22:10:13.744216 [ALL     ] [I] Task worker "crypto#1" finished.
+2026-06-23T22:10:13.744218 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Stopped PDCP entity
+2026-06-23T22:10:13.744387 [TEST    ] [I] Creating PDCP RX (12 bit nia=2 nea=2, {na})
+2026-06-23T22:10:13.744394 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: PDCP configured. rb_type=DRB rlc_mode=AM sn_size=12 t_reordering=10 count_notify=3221225472 count_max=3489660928 warn_on_drop=false
+=====================================[ Test "Stormbrain Test D: Middle Server Simulation" ]=====================================
+[Middle Server] Intercepted PDU from CU. Length: 4, Content: 80 01 18 e2
+2026-06-23T22:10:13.744719 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: Security configured: NIA2 (off) NEA2 (off) domain=UP
+2026-06-23T22:10:13.744719 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: 128 K_int: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-23T22:10:13.744719 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: 128 K_enc: 
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+2026-06-23T22:10:13.744724 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 01 18 e2
+2026-06-23T22:10:13.744724 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=1 rx_deliv=1 rx_reord=0
+2026-06-23T22:10:13.744724 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=1 count=1
+    0000: 80 01 18 e2
+2026-06-23T22:10:13.744727 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=1. count=1 pdu_len=4
+2026-06-23T22:10:13.744728 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=1 verified=false
+    0000: 80 01 18 e2
+[Middle Server] 1-second delay expired. Injecting duplicate PDU to UE.
+2026-06-23T22:10:13.744879 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Adding sn=1 to window.
+2026-06-23T22:10:13.744880 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX SDU. count=1
+2026-06-23T22:10:13.744880 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Removing sn=1 from window
+2026-06-23T22:10:13.744880 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=2 rx_deliv=2 rx_reord=0
+2026-06-23T22:10:13.744909 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX PDU. pdu_len=4
+    0000: 80 01 18 e2
+2026-06-23T22:10:13.744910 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: RX entity state. rx_next=2 rx_deliv=2 rx_reord=0
+2026-06-23T22:10:13.744910 [PDCP    ] [I] [     0.0] ue=0 DRB1 UL: RX PDU. type=data pdu_len=4 sn=1 count=1
+    0000: 80 01 18 e2
+2026-06-23T22:10:13.745019 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Using sec_engine with worker_idx=0. count=1 pdu_len=4
+2026-06-23T22:10:13.745020 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Security passed. count=1 verified=false
+    0000: 80 01 18 e2
+2026-06-23T22:10:13.745064 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Out-of-order after timeout, duplicate or count wrap-around. count=1 rx_next=2 rx_deliv=2 rx_reord=0
+================================================================================================================================
+2026-06-23T22:10:13.745570 [ALL     ] [I] Task worker "crypto#0" finished.
+2026-06-23T22:10:13.745571 [ALL     ] [I] Task worker "crypto#1" finished.
+2026-06-23T22:10:13.745573 [PDCP    ] [D] [     0.0] ue=0 DRB1 UL: Stopped PDCP entity
+[       OK ] pdcp_rx_stormbrain_test.TestD_MiddleServerImplementation (1 ms)
+
+
+[----------] 4 tests from pdcp_rx_stormbrain_test (19 ms total)
+
+[----------] Global test environment tear-down
+[==========] 4 tests from 1 test suite ran. (19 ms total)
+[  PASSED  ] 4 tests.
