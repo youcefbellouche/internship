@@ -10,6 +10,8 @@
 #include <list>
 #include <queue>
 #include <utility>
+#include <thread>
+#include <chrono>
 
 using namespace ocudu;
 
@@ -1497,6 +1499,345 @@ TEST_P(rlc_rx_am_test, rx_reverse_with_reversed_segmentation)
 
   rx_sdu_segments(sn, n_sdus, 4, 3, /* reverse_sdus = */ true, /* reverse_segments = */ true);
   rx_sdu_segments(sn, n_sdus, 8, 3, /* reverse_sdus = */ true, /* reverse_segments = */ true);
+}
+
+
+TEST_P(rlc_rx_am_test, TestRLC_AM_Case1_0to4_then_6to8)
+{
+  if (config.sn_field_length != rlc_am_sn_size::size18bits) {
+    return; // Run 18-bit configuration only
+  }
+
+  logger.info("======================================================================");
+  logger.info("Case 1: 0 to 4 then 6 to 8 (18-bit only)");
+  logger.info("======================================================================");
+
+  auto inject_sn = [this](uint32_t sn) {
+    logger.info("[TX-RX Comm] [TX] Sent PDU with SN={}", sn);
+    tick(); // Simulate 1ms channel latency
+    tick(); // Simulate another 1ms channel latency (2ms total propagation delay)
+    std::this_thread::sleep_for(std::chrono::milliseconds(5)); // Real-time propagation delay
+    std::list<std::vector<uint8_t>> pdu_list;
+    byte_buffer sdu;
+    create_pdus(pdu_list, sdu, sn, 20, 20);
+    for (auto& pdu_buf : pdu_list) {
+      byte_buffer_slice pdu = byte_buffer_slice::create(pdu_buf).value();
+      logger.info("[TX-RX Comm] [RX] Received PDU with SN={}", sn);
+      rlc->handle_pdu(std::move(pdu));
+    }
+  };
+
+  // 1. Initial transmissions
+  for (uint32_t sn = 0; sn <= 4; ++sn) inject_sn(sn);
+  for (uint32_t sn = 6; sn <= 8; ++sn) inject_sn(sn);
+
+  // 2. Expire t-Reassembly 1st time
+  logger.info("[TX-RX Comm] [RX] Running reassembly timer...");
+  for (int j = 0; j < config.t_reassembly; j++) tick();
+
+  EXPECT_TRUE(rlc->status_report_required());
+  rlc_am_status_pdu& status_report_1 = rlc->get_status_pdu();
+  logger.info("[TX-RX Comm] [RX] Sending STATUS report. ack_sn={}, NACKs=[5]", status_report_1.ack_sn);
+  logger.info("[TX-RX Comm] [TX] Received STATUS report. ack_sn={}, NACKs=[5]", status_report_1.ack_sn);
+
+  // 3. Drop first retransmission of SN 5. Send SN 9 to trigger timer restart
+  logger.info("[TX-RX Comm] [TX] Sent PDU with SN=9");
+  inject_sn(9);
+  logger.info("[TX-RX Comm] [TX] Retransmitting SN 5...");
+  logger.info("[TX-RX Comm] [RX] Retransmitted SN 5 dropped on channel!");
+
+  // 4. Run reassembly timer again (second cycle)
+  logger.info("[TX-RX Comm] [RX] Running reassembly timer (second cycle)...");
+  for (int j = 0; j < config.t_reassembly; j++) tick();
+
+  EXPECT_TRUE(rlc->status_report_required());
+  rlc_am_status_pdu& status_report_2 = rlc->get_status_pdu();
+  logger.info("[TX-RX Comm] [RX] Sending STATUS report. ack_sn={}, NACKs=[5]", status_report_2.ack_sn);
+  logger.info("[TX-RX Comm] [TX] Received STATUS report. ack_sn={}, NACKs=[5]", status_report_2.ack_sn);
+
+  // 5. Successful second retransmission of SN 5
+  logger.info("[TX-RX Comm] [TX] Retransmitting SN 5...");
+  inject_sn(5);
+
+  // 6. Verify delivery
+  logger.info("[TX-RX Comm] [RX] Delivered SDUs up to SN 9. rx_next={}", rlc->get_state().rx_next);
+  EXPECT_EQ(rlc->get_state().rx_next, 10);
+}
+
+TEST_P(rlc_rx_am_test, TestRLC_AM_Case2_0to4_then_8_7_6)
+{
+  if (config.sn_field_length != rlc_am_sn_size::size18bits) {
+    return; // Run 18-bit configuration only
+  }
+
+  logger.info("======================================================================");
+  logger.info("Case 2: 0 to 4 then 8, 6 (18-bit only)");
+  logger.info("======================================================================");
+
+  auto inject_sn = [this](uint32_t sn) {
+    logger.info("[TX-RX Comm] [TX] Sent PDU with SN={}", sn);
+    tick(); // Simulate 1ms channel latency
+    tick(); // Simulate another 1ms channel latency (2ms total propagation delay)
+    std::this_thread::sleep_for(std::chrono::milliseconds(5)); // Real-time propagation delay
+    std::list<std::vector<uint8_t>> pdu_list;
+    byte_buffer sdu;
+    create_pdus(pdu_list, sdu, sn, 20, 20);
+    for (auto& pdu_buf : pdu_list) {
+      byte_buffer_slice pdu = byte_buffer_slice::create(pdu_buf).value();
+      logger.info("[TX-RX Comm] [RX] Received PDU with SN={}", sn);
+      rlc->handle_pdu(std::move(pdu));
+    }
+  };
+
+  // 1. Initial transmissions
+  for (uint32_t sn = 0; sn <= 4; ++sn) inject_sn(sn);
+  inject_sn(8);
+  inject_sn(6);
+
+  // 2. Expire t-Reassembly
+  logger.info("[TX-RX Comm] [RX] Running reassembly timer...");
+  for (int j = 0; j < config.t_reassembly; j++) tick();
+
+  EXPECT_TRUE(rlc->status_report_required());
+  rlc_am_status_pdu& status_report = rlc->get_status_pdu();
+  logger.info("[TX-RX Comm] [RX] Sending STATUS report. ack_sn={}, NACKs=[5, 7]", status_report.ack_sn);
+  logger.info("[TX-RX Comm] [TX] Received STATUS report. ack_sn={}, NACKs=[5, 7]", status_report.ack_sn);
+
+  // 3. Retransmit SN 5 and SN 7
+  logger.info("[TX-RX Comm] [TX] Retransmitting SN 5...");
+  inject_sn(5);
+  logger.info("[TX-RX Comm] [TX] Retransmitting SN 7...");
+  inject_sn(7);
+
+  // 4. Verify delivery
+  logger.info("[TX-RX Comm] [RX] Delivered SDUs up to SN 8. rx_next={}", rlc->get_state().rx_next);
+  EXPECT_EQ(rlc->get_state().rx_next, 9);
+}
+
+TEST_P(rlc_rx_am_test, TestRLC_AM_Case3_0to4_then_6_8_9_10)
+{
+  if (config.sn_field_length != rlc_am_sn_size::size18bits) {
+    return; // Run 18-bit configuration only
+  }
+
+  logger.info("======================================================================");
+  logger.info("Case 3: 0 to 4 then 6, 8, 9, 10 (18-bit only)");
+  logger.info("======================================================================");
+
+  auto inject_sn = [this](uint32_t sn) {
+    logger.info("[TX-RX Comm] [TX] Sent PDU with SN={}", sn);
+    tick(); // Simulate 1ms channel latency
+    tick(); // Simulate another 1ms channel latency (2ms total propagation delay)
+    std::this_thread::sleep_for(std::chrono::milliseconds(5)); // Real-time propagation delay
+    std::list<std::vector<uint8_t>> pdu_list;
+    byte_buffer sdu;
+    create_pdus(pdu_list, sdu, sn, 20, 20);
+    for (auto& pdu_buf : pdu_list) {
+      byte_buffer_slice pdu = byte_buffer_slice::create(pdu_buf).value();
+      logger.info("[TX-RX Comm] [RX] Received PDU with SN={}", sn);
+      rlc->handle_pdu(std::move(pdu));
+    }
+  };
+
+  // 1. Initial transmissions
+  for (uint32_t sn = 0; sn <= 4; ++sn) inject_sn(sn);
+  inject_sn(6);
+  inject_sn(8);
+  inject_sn(9);
+  inject_sn(10);
+
+  // 2. Expire t-Reassembly 1st time
+  logger.info("[TX-RX Comm] [RX] Running reassembly timer...");
+  for (int j = 0; j < config.t_reassembly; j++) tick();
+
+  EXPECT_TRUE(rlc->status_report_required());
+  rlc_am_status_pdu& status_report_1 = rlc->get_status_pdu();
+  logger.info("[TX-RX Comm] [RX] Sending STATUS report. ack_sn={}, NACKs=[5] (7 deferred)", status_report_1.ack_sn);
+  logger.info("[TX-RX Comm] [TX] Received STATUS report. ack_sn={}, NACKs=[5]", status_report_1.ack_sn);
+
+  // 3. Retransmit SN 5
+  logger.info("[TX-RX Comm] [TX] Retransmitting SN 5...");
+  inject_sn(5);
+
+  // 4. Expire t-Reassembly 2nd time (for remaining gap 7)
+  logger.info("[TX-RX Comm] [RX] Running reassembly timer for SN 7...");
+  for (int j = 0; j < config.t_reassembly; j++) tick();
+
+  EXPECT_TRUE(rlc->status_report_required());
+  rlc_am_status_pdu& status_report_2 = rlc->get_status_pdu();
+  logger.info("[TX-RX Comm] [RX] Sending STATUS report. ack_sn={}, NACKs=[7]", status_report_2.ack_sn);
+  logger.info("[TX-RX Comm] [TX] Received STATUS report. ack_sn={}, NACKs=[7]", status_report_2.ack_sn);
+
+  // 5. Retransmit SN 7
+  logger.info("[TX-RX Comm] [TX] Retransmitting SN 7...");
+  inject_sn(7);
+
+  // 6. Verify delivery
+  logger.info("[TX-RX Comm] [RX] Delivered SDUs up to SN 10. rx_next={}", rlc->get_state().rx_next);
+  EXPECT_EQ(rlc->get_state().rx_next, 11);
+}
+
+TEST_P(rlc_rx_am_test, TestRLC_AM_Case4_0to4_then_6_5_8_9_10)
+{
+  if (config.sn_field_length != rlc_am_sn_size::size18bits) {
+    return; // Run 18-bit configuration only
+  }
+
+  logger.info("======================================================================");
+  logger.info("Case 4: 0 to 4 then 6, 5, 8, 9, 10 (18-bit only)");
+  logger.info("======================================================================");
+
+  auto inject_sn = [this](uint32_t sn) {
+    logger.info("[TX-RX Comm] [TX] Sent PDU with SN={}", sn);
+    tick(); // Simulate 1ms channel latency
+    tick(); // Simulate another 1ms channel latency (2ms total propagation delay)
+    std::this_thread::sleep_for(std::chrono::milliseconds(5)); // Real-time propagation delay
+    std::list<std::vector<uint8_t>> pdu_list;
+    byte_buffer sdu;
+    create_pdus(pdu_list, sdu, sn, 20, 20);
+    for (auto& pdu_buf : pdu_list) {
+      byte_buffer_slice pdu = byte_buffer_slice::create(pdu_buf).value();
+      logger.info("[TX-RX Comm] [RX] Received PDU with SN={}", sn);
+      rlc->handle_pdu(std::move(pdu));
+    }
+  };
+
+  // 1. Initial transmissions (5 arrives out of order before timer expires)
+  for (uint32_t sn = 0; sn <= 4; ++sn) inject_sn(sn);
+  inject_sn(6);
+  inject_sn(5); // gap at 5 filled, rx_next becomes 7, timer stopped.
+  inject_sn(8); // new gap at 7 restarts timer.
+  inject_sn(9);
+  inject_sn(10);
+
+  // 2. Expire t-Reassembly
+  logger.info("[TX-RX Comm] [RX] Running reassembly timer...");
+  for (int j = 0; j < config.t_reassembly; j++) tick();
+
+  EXPECT_TRUE(rlc->status_report_required());
+  rlc_am_status_pdu& status_report = rlc->get_status_pdu();
+  logger.info("[TX-RX Comm] [RX] Sending STATUS report. ack_sn={}, NACKs=[7]", status_report.ack_sn);
+  logger.info("[TX-RX Comm] [TX] Received STATUS report. ack_sn={}, NACKs=[7]", status_report.ack_sn);
+
+  // 3. Retransmit SN 7
+  logger.info("[TX-RX Comm] [TX] Retransmitting SN 7...");
+  inject_sn(7);
+
+  // 4. Verify delivery
+  logger.info("[TX-RX Comm] [RX] Delivered SDUs up to SN 10. rx_next={}", rlc->get_state().rx_next);
+  EXPECT_EQ(rlc->get_state().rx_next, 11);
+}
+
+TEST_P(rlc_rx_am_test, TestRLC_AM_Case5_0to4_then_6_8_5_9_10)
+{
+  if (config.sn_field_length != rlc_am_sn_size::size18bits) {
+    return; // Run 18-bit configuration only
+  }
+
+  logger.info("======================================================================");
+  logger.info("Case 5: 0 to 4 then 6, 8, 5, 9, 10 (18-bit only)");
+  logger.info("======================================================================");
+
+  auto inject_sn = [this](uint32_t sn) {
+    logger.info("[TX-RX Comm] [TX] Sent PDU with SN={}", sn);
+    tick(); // Simulate 1ms channel latency
+    tick(); // Simulate another 1ms channel latency (2ms total propagation delay)
+    std::this_thread::sleep_for(std::chrono::milliseconds(5)); // Real-time propagation delay
+    std::list<std::vector<uint8_t>> pdu_list;
+    byte_buffer sdu;
+    create_pdus(pdu_list, sdu, sn, 20, 20);
+    for (auto& pdu_buf : pdu_list) {
+      byte_buffer_slice pdu = byte_buffer_slice::create(pdu_buf).value();
+      logger.info("[TX-RX Comm] [RX] Received PDU with SN={}", sn);
+      rlc->handle_pdu(std::move(pdu));
+    }
+  };
+
+  // 1. Initial transmissions
+  for (uint32_t sn = 0; sn <= 4; ++sn) inject_sn(sn);
+  inject_sn(6);
+  inject_sn(8);
+  inject_sn(5); // gap at 5 resolved, rx_next becomes 7.
+  inject_sn(9);
+  inject_sn(10);
+
+  // 2. Expire t-Reassembly
+  logger.info("[TX-RX Comm] [RX] Running reassembly timer...");
+  for (int j = 0; j < config.t_reassembly; j++) tick();
+
+  EXPECT_TRUE(rlc->status_report_required());
+  rlc_am_status_pdu& status_report = rlc->get_status_pdu();
+  logger.info("[TX-RX Comm] [RX] Sending STATUS report. ack_sn={}, NACKs=[7]", status_report.ack_sn);
+  logger.info("[TX-RX Comm] [TX] Received STATUS report. ack_sn={}, NACKs=[7]", status_report.ack_sn);
+
+  // 3. Retransmit SN 7
+  logger.info("[TX-RX Comm] [TX] Retransmitting SN 7...");
+  inject_sn(7);
+
+  // 4. Verify delivery
+  logger.info("[TX-RX Comm] [RX] Delivered SDUs up to SN 10. rx_next={}", rlc->get_state().rx_next);
+  EXPECT_EQ(rlc->get_state().rx_next, 11);
+}
+
+TEST_P(rlc_rx_am_test, TestRLC_AM_Case6_0to4_then_8_5_6_9_10_12_Expire_11_12_13)
+{
+  if (config.sn_field_length != rlc_am_sn_size::size18bits) {
+    return; // Run 18-bit configuration only
+  }
+
+  logger.info("======================================================================");
+  logger.info("Case 6: 0 to 4 then 8, 5, 6, 9, 10, 12 -> Expire -> 11, 12, 13 (18-bit only)");
+  logger.info("======================================================================");
+
+  auto inject_sn = [this](uint32_t sn) {
+    logger.info("[TX-RX Comm] [TX] Sent PDU with SN={}", sn);
+    tick(); // Simulate 1ms channel latency
+    tick(); // Simulate another 1ms channel latency (2ms total propagation delay)
+    std::this_thread::sleep_for(std::chrono::milliseconds(5)); // Real-time propagation delay
+    std::list<std::vector<uint8_t>> pdu_list;
+    byte_buffer sdu;
+    create_pdus(pdu_list, sdu, sn, 20, 20);
+    for (auto& pdu_buf : pdu_list) {
+      byte_buffer_slice pdu = byte_buffer_slice::create(pdu_buf).value();
+      logger.info("[TX-RX Comm] [RX] Received PDU with SN={}", sn);
+      rlc->handle_pdu(std::move(pdu));
+    }
+  };
+
+  // 1. Initial transmissions
+  for (uint32_t sn = 0; sn <= 4; ++sn) inject_sn(sn);
+  inject_sn(8);
+  inject_sn(5);
+  inject_sn(6);
+  inject_sn(9);
+  inject_sn(10);
+  inject_sn(12);
+
+  // 2. Expire t-Reassembly 1st time
+  logger.info("[TX-RX Comm] [RX] Running reassembly timer...");
+  for (int j = 0; j < config.t_reassembly; j++) tick();
+
+  EXPECT_TRUE(rlc->status_report_required());
+  rlc_am_status_pdu& status_report_1 = rlc->get_status_pdu();
+  logger.info("[TX-RX Comm] [RX] Sending STATUS report. ack_sn={}, NACKs=[7] (11 deferred)", status_report_1.ack_sn);
+  logger.info("[TX-RX Comm] [TX] Received STATUS report. ack_sn={}, NACKs=[7]", status_report_1.ack_sn);
+
+  // 3. Retransmit SN 7
+  logger.info("[TX-RX Comm] [TX] Retransmitting SN 7...");
+  inject_sn(7); // rx_next advances to 11
+
+  // 4. Inject post-expiry SNs 11, 12, 13
+  logger.info("[TX-RX Comm] [TX] Injecting post-expiry SNs 11, 12, 13...");
+  inject_sn(11);
+  inject_sn(12);
+  inject_sn(13);
+
+  // 5. Tick time slightly to complete processing
+  tick();
+
+  // 6. Verify delivery
+  logger.info("[TX-RX Comm] [RX] Delivered SDUs up to SN 13. rx_next={}", rlc->get_state().rx_next);
+  EXPECT_EQ(rlc->get_state().rx_next, 14);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

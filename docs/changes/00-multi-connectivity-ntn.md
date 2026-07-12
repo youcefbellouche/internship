@@ -1,7 +1,6 @@
 # Multi-Connectivity (MR-DC) and NTN Implementation Analysis
 
 **Date:** 2026-06-22  
-**Author:** AI Pair Programmer  
 **Status:** Documented Analysis  
 
 ---

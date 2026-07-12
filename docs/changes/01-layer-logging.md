@@ -1,7 +1,6 @@
 # Change 01: Layer-by-Layer Protocol Logging
 
 **Date:** 2026-06-19  
-**Author:** AI Pair Programmer  
 **Status:** Implemented & Verified  
 
 ---

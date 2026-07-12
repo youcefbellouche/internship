@@ -5,6 +5,7 @@
 #include "rlc_rx_am_entity.h"
 #include "ocudu/adt/scope_exit.h"
 #include "ocudu/instrumentation/traces/up_traces.h"
+#include <set>
 
 using namespace ocudu;
 
@@ -130,6 +131,30 @@ void rlc_rx_am_entity::handle_data_pdu(byte_buffer_slice buf)
     return;
   }
   logger.log_info(buf.begin(), buf.end(), "RX PDU. pdu_len={} {}", buf.length(), header);
+
+  // RLC AM Experiment test hooks
+  char* scenario_str = std::getenv("RLC_TEST_SCENARIO");
+  if (scenario_str && pcap_context.bearer_type == PCAP_RLC_BEARER_TYPE_DRB) {
+    int scenario = std::atoi(scenario_str);
+    static std::set<uint32_t> dropped_sns;
+    if (scenario == 1) {
+      if (header.sn == 5 || header.sn == 19) {
+        if (dropped_sns.find(header.sn) == dropped_sns.end()) {
+          dropped_sns.insert(header.sn);
+          logger.log_info("[TEST_HOOK] Dropping PDU with SN={} for Scenario 1 (first arrival)", header.sn);
+          return;
+        }
+      }
+    } else if (scenario == 2) {
+      if (header.sn == 5) {
+        if (dropped_sns.find(header.sn) == dropped_sns.end()) {
+          dropped_sns.insert(header.sn);
+          logger.log_info("[TEST_HOOK] Dropping PDU with SN={} for Scenario 2 (first arrival)", header.sn);
+          return;
+        }
+      }
+    }
+  }
 
   // length check: there must be at least one payload byte
   size_t header_len = header.get_packed_size();

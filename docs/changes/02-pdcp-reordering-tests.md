@@ -1,7 +1,6 @@
 # Change 02: PDCP Duplicate Discarding and t-Reordering Tests
 
 **Date:** 2026-06-22  
-**Author:** AI Pair Programmer  
 **Status:** Implemented & Verified  
 
 ---

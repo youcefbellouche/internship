@@ -234,8 +234,8 @@ qos:
           sn: 18
           t-poll-retransmit: 80
           max-retx-threshold: 4
-          poll-pdu: 64
-          poll-byte: 125
+          poll-pdu: -1
+          poll-byte: -1
           queue-size: 16384
           queue-bytes: 6172672
         rx:
@@ -266,8 +266,8 @@ qos:
           sn: 18
           t-poll-retransmit: 80
           max-retx-threshold: 4
-          poll-pdu: 64
-          poll-byte: 125
+          poll-pdu: -1
+          poll-byte: -1
           queue-size: 16384
           queue-bytes: 6172672
         rx:
@@ -325,8 +325,8 @@ qos:
           sn: 18
           t-poll-retransmit: 80
           max-retx-threshold: 4
-          poll-pdu: 64
-          poll-byte: 125
+          poll-pdu: -1
+          poll-byte: -1
           queue-size: 16384
           queue-bytes: 6172672
         rx:
@@ -357,7 +357,7 @@ qos:
           sn: 18
           t-poll-retransmit: 100
           max-retx-threshold: 32
-          poll-pdu: 16
+          poll-pdu: -1
           poll-byte: -1
           queue-size: 16384
           queue-bytes: 6172672
