@@ -1,0 +1,17 @@
+cu_cp:
+  amf:
+    addrs: 127.0.0.5
+    bind_addrs: 127.0.0.1
+    supported_tracking_areas:
+      - tac: 1
+        plmn_list:
+          - plmn: "99970"
+            tai_slice_support_list:
+              - sst: 1
+  e1ap:
+    bind_addrs: 127.0.20.1
+  f1ap:
+    bind_addrs: 127.0.10.1
+log:
+  filename: /tmp/endc_cu_cp.log
+  all_level: debug

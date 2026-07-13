@@ -232,10 +232,14 @@ int ue_stack_lte::init(const stack_args_t& args_)
     sdap.init(&sdap_pdcp, gw);
   }
 
+  std::string role = (args.usim.imsi == "999700123456781") ? "SN" : "MN";
+  pdcp.set_xn_role(role);
+
   mac_nr_args_t mac_nr_args = {};
   mac_nr.init(mac_nr_args, phy_nr, &rlc_nr, &rrc_nr);
   rlc_nr.init(&pdcp_nr, &rrc_nr, task_sched.get_timer_handler(), 0 /* RB_ID_SRB0 */);
   pdcp_nr.init(&rlc_nr, &rrc_nr, gw);
+  pdcp_nr.set_xn_role(role);
   rrc_nr.init(phy_nr,
               &mac_nr,
               &rlc_nr,

@@ -26,9 +26,53 @@
 #include "srsran/common/task_scheduler.h"
 #include "srsran/interfaces/ue_pdcp_interfaces.h"
 #include "srsran/upper/pdcp_entity_lte.h"
+#include "srsran/interfaces/ue_rlc_interfaces.h"
 #include <set>
+#include <thread>
+#include <atomic>
 
 namespace srsran {
+
+class rlc_split_bridge : public srsue::rlc_interface_pdcp
+{
+public:
+  srsue::rlc_interface_pdcp* mn_rlc = nullptr;
+  srsue::rlc_interface_pdcp* sn_rlc = nullptr;
+
+  void write_sdu(uint32_t lcid, srsran::unique_byte_buffer_t sdu) override
+  {
+    if (sn_rlc) {
+      srsran::unique_byte_buffer_t sdu_sn = srsran::make_byte_buffer();
+      sdu_sn->N_bytes = sdu->N_bytes;
+      std::memcpy(sdu_sn->msg, sdu->msg, sdu->N_bytes);
+      sn_rlc->write_sdu(lcid, std::move(sdu_sn));
+    }
+    if (mn_rlc) {
+      mn_rlc->write_sdu(lcid, std::move(sdu));
+    }
+  }
+
+  void discard_sdu(uint32_t lcid, uint32_t discard_sn) override
+  {
+    if (sn_rlc) sn_rlc->discard_sdu(lcid, discard_sn);
+    if (mn_rlc) mn_rlc->discard_sdu(lcid, discard_sn);
+  }
+
+  bool rb_is_um(uint32_t lcid) override
+  {
+    return mn_rlc ? mn_rlc->rb_is_um(lcid) : false;
+  }
+
+  bool sdu_queue_is_full(uint32_t lcid) override
+  {
+    return mn_rlc ? mn_rlc->sdu_queue_is_full(lcid) : false;
+  }
+
+  bool is_suspended(const uint32_t lcid) override
+  {
+    return mn_rlc ? mn_rlc->is_suspended(lcid) : false;
+  }
+};
 
 class pdcp : public srsue::pdcp_interface_rlc, public srsue::pdcp_interface_rrc
 {
@@ -37,6 +81,8 @@ public:
   virtual ~pdcp();
   void init(srsue::rlc_interface_pdcp* rlc_, srsue::rrc_interface_pdcp* rrc_, srsue::gw_interface_pdcp* gw_);
   void stop();
+  void set_xn_role(const std::string& role);
+  void set_rlc_sn(srsue::rlc_interface_pdcp* rlc_sn_) { rlc_sn = rlc_sn_; split_bridge.sn_rlc = rlc_sn_; }
 
   // Stack interface
   bool is_lcid_enabled(uint32_t lcid);
@@ -80,6 +126,8 @@ public:
 
 private:
   srsue::rlc_interface_pdcp* rlc    = nullptr;
+  srsue::rlc_interface_pdcp* rlc_sn = nullptr;
+  rlc_split_bridge           split_bridge;
   srsue::rrc_interface_pdcp* rrc    = nullptr;
   srsue::gw_interface_pdcp*  gw     = nullptr;
   srsran::task_sched_handle  task_sched;
@@ -97,6 +145,12 @@ private:
 
   // Timer needed for metrics calculation
   std::chrono::high_resolution_clock::time_point metrics_tp;
+  std::string        xn_role = "";
+
+  // Mock Xn-Bridge fields
+  std::thread        xn_rx_thread;
+  std::atomic<bool>  xn_rx_running{false};
+  int                xn_rx_sock = -1;
 };
 
 } // namespace srsran

@@ -99,6 +99,10 @@ public:
             gw_interface_stack*      gw_);
   bool switch_on() final;
   bool switch_off() final;
+  srsran::pdcp* get_pdcp_nr() { return &pdcp_nr; }
+  srsran::pdcp* get_pdcp_lte() { return &pdcp; }
+  srsran::rlc*  get_rlc_nr() { return &rlc_nr; }
+  srsran::rlc*  get_rlc_lte() { return &rlc; }
   bool is_registered() final;
   bool start_service_request() final;
   bool enable_data();

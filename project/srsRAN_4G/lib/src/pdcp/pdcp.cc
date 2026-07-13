@@ -21,15 +21,83 @@
 
 #include "srsran/upper/pdcp.h"
 #include "srsran/upper/pdcp_entity_nr.h"
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <cstring>
+#include <vector>
 
 namespace srsran {
 
 pdcp::pdcp(srsran::task_sched_handle task_sched_, const char* logname) :
   task_sched(task_sched_), logger(srslog::fetch_basic_logger(logname))
-{}
+{
+}
+
+void pdcp::set_xn_role(const std::string& role)
+{
+  xn_role = role;
+  if (role == "MN" && !xn_rx_running) {
+    xn_rx_running = true;
+    xn_rx_thread = std::thread([this]() {
+      int sock = socket(AF_INET, SOCK_DGRAM, 0);
+      if (sock < 0) return;
+      xn_rx_sock = sock;
+
+      struct sockaddr_in addr;
+      std::memset(&addr, 0, sizeof(addr));
+      addr.sin_family = AF_INET;
+      addr.sin_addr.s_addr = INADDR_ANY;
+      addr.sin_port = htons(55555);
+
+      int reuse = 1;
+      setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+
+      if (bind(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+        close(sock);
+        return;
+      }
+
+      uint8_t buffer[8192];
+      while (xn_rx_running) {
+        struct sockaddr_in client_addr;
+        socklen_t client_len = sizeof(client_addr);
+        ssize_t n = recvfrom(sock, buffer, sizeof(buffer), 0, (struct sockaddr*)&client_addr, &client_len);
+        if (n < 0) {
+          if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) continue;
+          break;
+        }
+        if (n >= 4) {
+          uint32_t lcid = (buffer[0] << 24) | (buffer[1] << 16) | (buffer[2] << 8) | buffer[3];
+          
+          logger.info("Xn-Bridge: Received PDU from SN on UDP socket for lcid=%u, len=%d", lcid, (int)(n - 4));
+
+          unique_byte_buffer_t pdu = srsran::make_byte_buffer();
+          pdu->N_bytes = n - 4;
+          std::memcpy(pdu->msg, buffer + 4, n - 4);
+          
+          write_pdu(lcid, std::move(pdu));
+        }
+      }
+      close(sock);
+    });
+  }
+}
 
 pdcp::~pdcp()
 {
+  if (xn_rx_running) {
+    xn_rx_running = false;
+    if (xn_rx_sock >= 0) {
+      shutdown(xn_rx_sock, SHUT_RDWR);
+      close(xn_rx_sock);
+    }
+    if (xn_rx_thread.joinable()) {
+      xn_rx_thread.join();
+    }
+  }
+
   {
     std::lock_guard<std::mutex> lock(cache_mutex);
     valid_lcids_cached.clear();
@@ -41,9 +109,15 @@ pdcp::~pdcp()
 
 void pdcp::init(srsue::rlc_interface_pdcp* rlc_, srsue::rrc_interface_pdcp* rrc_, srsue::gw_interface_pdcp* gw_)
 {
-  rlc = rlc_;
+  split_bridge.mn_rlc = rlc_;
+  rlc = &split_bridge;
   rrc = rrc_;
   gw  = gw_;
+
+  char* env_role = std::getenv("PDCP_XN_ROLE");
+  if (xn_role.empty() && env_role) {
+    set_xn_role(std::string(env_role));
+  }
 }
 
 void pdcp::stop() {}
@@ -287,6 +361,30 @@ std::map<uint32_t, srsran::unique_byte_buffer_t> pdcp::get_buffered_pdus(uint32_
 *******************************************************************************/
 void pdcp::write_pdu(uint32_t lcid, unique_byte_buffer_t pdu)
 {
+  if (xn_role == "SN" || (xn_role.empty() && std::getenv("PDCP_XN_ROLE") && std::string(std::getenv("PDCP_XN_ROLE")) == "SN")) {
+    int sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock >= 0) {
+      struct sockaddr_in dest;
+      std::memset(&dest, 0, sizeof(dest));
+      dest.sin_family = AF_INET;
+      dest.sin_addr.s_addr = inet_addr("127.0.0.1");
+      dest.sin_port = htons(55555);
+
+      logger.info("Xn-Bridge: Forwarding SN PDU to MN on UDP socket for lcid=%u, len=%d", lcid, (int)pdu->N_bytes);
+
+      std::vector<uint8_t> pkt(4 + pdu->N_bytes);
+      pkt[0] = (lcid >> 24) & 0xFF;
+      pkt[1] = (lcid >> 16) & 0xFF;
+      pkt[2] = (lcid >> 8) & 0xFF;
+      pkt[3] = lcid & 0xFF;
+      std::memcpy(pkt.data() + 4, pdu->msg, pdu->N_bytes);
+
+      sendto(sock, pkt.data(), pkt.size(), 0, (struct sockaddr*)&dest, sizeof(dest));
+      close(sock);
+    }
+    return;
+  }
+
   if (valid_lcid(lcid)) {
     pdcp_array.at(lcid)->write_pdu(std::move(pdu));
   } else {

@@ -35,6 +35,7 @@
 #include "srsue/hdr/metrics_json.h"
 #include "srsue/hdr/metrics_stdout.h"
 #include "srsue/hdr/ue.h"
+#include "srsue/hdr/stack/ue_stack_lte.h"
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <csignal>
@@ -66,6 +67,27 @@ static std::atomic<bool> running        = {true};
 /**********************************************************************
  *  Program arguments processing
  ***********************************************************************/
+static void parse_simple_sn_config(const std::string& filename, all_args_t* args_sn)
+{
+  std::ifstream file(filename);
+  if (!file.is_open()) return;
+  std::string line;
+  while (std::getline(file, line)) {
+    line.erase(std::remove_if(line.begin(), line.end(), [](unsigned char x) { return std::isspace(x); }), line.end());
+    if (line.empty() || line[0] == '#' || line[0] == ';') continue;
+    auto pos = line.find('=');
+    if (pos != std::string::npos) {
+      std::string key = line.substr(0, pos);
+      std::string val = line.substr(pos + 1);
+      if (key == "device_args") {
+        args_sn->rf.device_args = val;
+      } else if (key == "imsi") {
+        args_sn->stack.usim.imsi = val;
+      }
+    }
+  }
+}
+
 string config_file;
 
 static int parse_args(all_args_t* args, int argc, char* argv[])
@@ -814,6 +836,34 @@ int main(int argc, char* argv[])
     return SRSRAN_SUCCESS;
   }
 
+  std::unique_ptr<srsue::ue> ue_sn_ptr;
+  char* sn_config_env = std::getenv("SRSUE_SN_CONFIG");
+  if (sn_config_env) {
+    all_args_t args_sn = args;
+    parse_simple_sn_config(sn_config_env, &args_sn);
+    args_sn.gw.tun_dev_name = "tun_srsue_sn";
+    args_sn.gw.netns = ""; // run in default namespace to avoid setns/netns conflicts
+    
+    ue_sn_ptr.reset(new srsue::ue());
+    if (ue_sn_ptr->init(args_sn)) {
+      ue_sn_ptr->stop();
+      ue.stop();
+      return SRSRAN_SUCCESS;
+    }
+
+    ue_stack_lte* stack_mn = dynamic_cast<ue_stack_lte*>(ue.get_stack());
+    ue_stack_lte* stack_sn = dynamic_cast<ue_stack_lte*>(ue_sn_ptr->get_stack());
+    if (stack_mn && stack_sn) {
+      srsran::pdcp* pdcp_mn = stack_mn->get_pdcp_nr();
+      srsran::rlc*  rlc_sn  = stack_sn->get_rlc_nr();
+
+      rlc_sn->set_pdcp(pdcp_mn);
+      pdcp_mn->set_rlc_sn(rlc_sn);
+
+      cout << "Monolithic Stack: Linked SN RLC directly to MN PDCP via C++ pointers." << endl;
+    }
+  }
+
   srsran::metrics_hub<ue_metrics_t> metricshub;
   metrics_stdout                    _metrics_screen;
 
@@ -848,6 +898,9 @@ int main(int argc, char* argv[])
 
   cout << "Attaching UE..." << endl;
   ue.switch_on();
+  if (ue_sn_ptr) {
+    ue_sn_ptr->switch_on();
+  }
 
   if (args.gui.enable) {
     ue.start_plot();
@@ -858,11 +911,17 @@ int main(int argc, char* argv[])
   }
 
   ue.switch_off();
+  if (ue_sn_ptr) {
+    ue_sn_ptr->switch_off();
+  }
   pthread_cancel(input);
   pthread_join(input, nullptr);
   metricshub.stop();
   metrics_file.stop();
   ue.stop();
+  if (ue_sn_ptr) {
+    ue_sn_ptr->stop();
+  }
   cout << "---  exiting  ---" << endl;
 
   return SRSRAN_SUCCESS;

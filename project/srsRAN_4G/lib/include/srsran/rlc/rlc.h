@@ -55,6 +55,7 @@ public:
             uint32_t                   lcid_,
             bsr_callback_t             bsr_callback_);
   void stop();
+  void set_pdcp(srsue::pdcp_interface_rlc* pdcp_) { pdcp = pdcp_; }
 
   void get_metrics(rlc_metrics_t& m, const uint32_t nof_tti);
 

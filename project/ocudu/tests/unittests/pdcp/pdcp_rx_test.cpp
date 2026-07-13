@@ -1091,6 +1091,45 @@ TEST_F(pdcp_rx_stormbrain_test, TestD_MiddleServerImplementation)
   }
 }
 
+TEST_F(pdcp_rx_stormbrain_test, TestE_MockXnBridgeDualPath)
+{
+  ocudu::test_delimit_logger delimiter("Stormbrain Test E: Mock Xn Bridge Dual Path Simulation");
+
+  pdcp_rx_state init_state = {.rx_next = 1, .rx_deliv = 1, .rx_reord = 0};
+  pdcp_rx->set_state(init_state);
+
+  // 1. MN RLC path: Inject SN = 1
+  fmt::print("[Sim Time: {} ms] [MN Stack] RLC delivers SN=1\n", timers.now());
+  pdcp_rx->handle_pdu(byte_buffer_chain::create(create_pdu(1)).value());
+  wait_pending_crypto();
+  worker.run_pending_tasks();
+  ASSERT_EQ(test_frame->sdu_queue.size(), 1);
+  EXPECT_FALSE(pdcp_rx->is_reordering_timer_running());
+
+  // 2. SN RLC path: Inject SN = 3 (arrives out of order, starting reordering timer)
+  fmt::print("[Sim Time: {} ms] [SN Stack] RLC delivers SN=3\n", timers.now());
+  pdcp_rx->handle_pdu(byte_buffer_chain::create(create_pdu(3)).value());
+  wait_pending_crypto();
+  worker.run_pending_tasks();
+  ASSERT_EQ(test_frame->sdu_queue.size(), 1); // 3 is buffered
+  EXPECT_TRUE(pdcp_rx->is_reordering_timer_running());
+  EXPECT_EQ(pdcp_rx->get_state().rx_reord, 4);
+
+  // 3. Mock Xn-Bridge: SN stack forwards SN = 2 over loopback/bridge to MN PDCP
+  fmt::print("[Sim Time: {} ms] [Mock Xn-Bridge] Forwarding SN=2 from SN to MN PDCP\n", timers.now());
+  pdcp_rx->handle_pdu(byte_buffer_chain::create(create_pdu(2)).value());
+  wait_pending_crypto();
+  worker.run_pending_tasks();
+
+  // All packets (1, 2, 3) delivered. Reordering timer stops.
+  ASSERT_EQ(test_frame->sdu_queue.size(), 3);
+  EXPECT_FALSE(pdcp_rx->is_reordering_timer_running());
+
+  while (!test_frame->sdu_queue.empty()) {
+    test_frame->sdu_queue.pop();
+  }
+}
+
 int main(int argc, char** argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
