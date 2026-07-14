@@ -41,14 +41,22 @@ public:
 
   void write_sdu(uint32_t lcid, srsran::unique_byte_buffer_t sdu) override
   {
-    if (sn_rlc) {
-      srsran::unique_byte_buffer_t sdu_sn = srsran::make_byte_buffer();
-      sdu_sn->N_bytes = sdu->N_bytes;
-      std::memcpy(sdu_sn->msg, sdu->msg, sdu->N_bytes);
-      sn_rlc->write_sdu(lcid, std::move(sdu_sn));
+    if (lcid < 3) {
+      if (mn_rlc) {
+        mn_rlc->write_sdu(lcid, std::move(sdu));
+      }
+      return;
     }
-    if (mn_rlc) {
-      mn_rlc->write_sdu(lcid, std::move(sdu));
+
+    static std::atomic<uint32_t> packet_counter{0};
+    
+    bool mn_full = mn_rlc ? mn_rlc->sdu_queue_is_full(lcid) : true;
+    bool sn_full = sn_rlc ? sn_rlc->sdu_queue_is_full(lcid) : true;
+
+    if ((packet_counter++ % 2 == 0 && !mn_full) || sn_full) {
+      if (mn_rlc) mn_rlc->write_sdu(lcid, std::move(sdu));
+    } else {
+      if (sn_rlc) sn_rlc->write_sdu(lcid, std::move(sdu));
     }
   }
 
