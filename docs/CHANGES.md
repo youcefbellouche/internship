@@ -14,6 +14,8 @@ Each custom change has its own markdown file detailing the goal, code changes, a
 | **03** | 2026-06-23 | [README.md](phase-2-test/README.md) | Generated execution logs for PDCP RX tests and analyzed results, duplicate logging, and async logger buffering artifacts. |
 | **04** | 2026-07-13 | [04-monolithic-dual-path-ue-stack.md](changes/04-monolithic-dual-path-ue-stack.md) | Implemented dual DUs attached to a single CU and a monolithic single-process dual-path UE stack (1 shared PDCP, 2 RLC/MAC/PHY paths linked via C++ pointers). |
 | **05** | 2026-07-14 | [05-dynamic-split-policy.md](changes/05-dynamic-split-policy.md) | Implemented congestion-aware dynamic split bearer policy at UE PDCP and verified E2E user-plane ping with Open5GS and dual DUs. |
+| **06** | 2026-07-17 | [run_guide.md](run_guide.md) | Created step-by-step execution, testing, and debugging guide for running dual towers and the monolithic UE. |
+
 
 
 
