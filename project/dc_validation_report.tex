@@ -1,0 +1,205 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{color}
+\usepackage{url}
+
+\definecolor{lightgray}{rgb}{0.95, 0.95, 0.95}
+\lstset{
+    backgroundcolor=\color{lightgray},
+    basicstyle=\small\ttfamily,
+    breaklines=true,
+    frame=single,
+    language=C++
+}
+
+\begin{document}
+
+\title{Experimental Validation of Dual Connectivity Architecture \\ and Custom PDCP Split Bearer Ratios in 5G SA Networks}
+
+\author{
+  \IEEEauthorblockN{Stefano Taborelli\IEEEauthorrefmark{1}, Youcef Bellouche\IEEEauthorrefmark{2}, Pedro B. Velloso\IEEEauthorrefmark{1}, Megumi Kaneko\IEEEauthorrefmark{3}, Stefano Secci\IEEEauthorrefmark{1}}
+  \IEEEauthorblockA{\IEEEauthorrefmark{1}CNAM, Paris, France. \{stefano.taborelli, pedro.velloso, stefano.secci\}@cnam.fr}
+  \IEEEauthorblockA{\IEEEauthorrefmark{2}CNAM, Paris, France (Master's Student). youcef.bellouche.auditeur@lecnam.net}
+  \IEEEauthorblockA{\IEEEauthorrefmark{3}National Institute of Informatics (NII). megkaneko@nii.ac.jp}
+}
+
+\maketitle
+
+\begin{abstract}
+This paper presents the design, implementation, and experimental validation of a paired multi-connectivity architecture using standard-compliant open-source 5G elements. The User Equipment (UE) protocol stack is custom-modified to operate with one Packet Data Convergence Protocol (PDCP) layer and two Radio Link Control (RLC) entities connected across two distinct Distributed Units (DU1 and DU2). We validate key functionalities including dynamic ratio-based PDCP traffic splitting, physical-layer propagation delay emulation, and Timing Advance (TA) compensation. The paper also contrasts the network-wide impacts of physical layer degradation against isolated MAC-layer transport block (TB) loss. Finally, we present an extension of the architecture to support 3GPP Release 17 Non-Terrestrial Network (NTN) satellite communication configurations.
+\end{abstract}
+
+\begin{IEEEkeywords}
+5G Standalone, Dual Connectivity, PDCP Split Bearer, Packet Duplication, Non-Terrestrial Networks (NTN), ZeroMQ.
+\end{IEEEkeywords}
+
+\section{Introduction}
+Multi-Radio Dual Connectivity (MR-DC) represents a foundational pillar in 3GPP 5G Standalone (SA) deployments, allowing a User Equipment (UE) to transmit and receive data simultaneously across multiple Distributed Units (DUs). This configuration enables Split Bearers and Packet Duplication, optimizing both user throughput and connection reliability. In actual deployments, scheduling split traffic dynamically according to link conditions and modeling propagation delay accurately are crucial for maintaining Quality of Service (QoS).
+
+This paper documents the validation of a 5G Standalone multi-connectivity testbed using virtual radio nodes. The UE stack, based on srsRAN, has been custom-modified to anchor a single PDCP entity to two RLC entities bound to different gNodeB DUs. The remainder of this paper presents core definitions, simulation configurations, delay emulation mechanics, link adaptation analyses, a C++ implementation of a dynamic split-bearer ratio controller, and a Non-Terrestrial Network (NTN) satellite emulation extension.
+
+\section{Core Definitions \& Key Concepts}
+To establish the technical foundation for Multi-Radio Dual Connectivity (MR-DC) evaluations, we define the core operations of the user plane protocol layers:
+
+\begin{itemize}
+    \item \textbf{MR-DC (Multi-Radio Dual Connectivity)}: A 3GPP capability enabling a single UE to simultaneously connect to two separate cell towers (a Master Node and a Secondary Node) to transmit or receive data plane traffic in parallel over independent RF paths.
+    \item \textbf{PDCP (Packet Data Convergence Protocol)}: The protocol layer responsible for header compression (ROHC), ciphering/integrity protection, and in-sequence delivery/reordering of packets arriving from multiple radio paths.
+    \item \textbf{RLC (Radio Link Control)}: Performs packet segmentation, retransmission (ARQ), and error control local to each individual radio link. Each link is identified by a Logical Channel ID (LCID).
+    \item \textbf{Split Bearer}: A configuration where user plane traffic is divided at the Central Unit (CU) and routed over separate Distributed Units (DUs). The UE reassembles the split streams at its single PDCP entity.
+    \item \textbf{Packet Duplication (URLLC)}: A transmission technique where the PDCP layer replicates PDUs and transmits them simultaneously across both DU legs to ensure ultra-reliability. The receiving PDCP layer discards redundant duplicates.
+    \item \textbf{Timing Advance (TA)}: A mechanism where the base station commands the UE to advance its uplink transmission timing to compensate for propagation delay, ensuring frame alignment at the receiver.
+    \item \textbf{Non-Terrestrial Networks (NTN)}: A 3GPP standard (introduced in Rel-17) enabling cellular communications over satellite nodes (LEO, MEO, GEO) or high-altitude platforms.
+\end{itemize}
+
+\section{Background \& Related Work}
+In traditional single-connectivity networks, wireless links are susceptible to deep fades, shadowing, and blockages, which degrade the user experience. 3GPP introduced Dual Connectivity in Release 12 for LTE networks, which has subsequently evolved into Multi-Radio Dual Connectivity (MR-DC) in 5G Release 15/16.
+
+MR-DC allows for multi-path transmission. Research shows that Split Bearers significantly increase peak throughput by utilizing the resource blocks of both the Master Cell Group (MCG) and the Secondary Cell Group (SCG) concurrently. Conversely, for Ultra-Reliable Low-Latency Communications (URLLC), PDCP Packet Duplication minimizes outage probabilities by transmitting identical data copies across independent fading channels.
+
+With the release of 3GPP Release 17, cellular networks have been extended to include satellite links. NTN architectures introduce high propagation delays (up to hundreds of milliseconds) and substantial Doppler shifts, necessitating Timing Advance modifications, satellite ephemeris broadcasting via System Information Blocks (SIB19), and modified HARQ feedback mechanisms.
+
+\section{Simulation Testbed \& Tools}
+The simulated end-to-end 5G SA testbed is composed of the following open-source and software-defined components:
+\begin{itemize}
+    \item \textbf{5G Core (Open5GS)}: Handles control plane registration (AMF) and user plane traffic routing (UPF) backed by a MongoDB subscriber database.
+    \item \textbf{oCUDU gNB}: A standard-compliant split gNodeB. The Central Unit (CU-CP/UP) coordinates the radio resource control while two Distributed Units (DU1 and DU2) schedule transmission blocks.
+    \item \textbf{Modified srsRAN UE}: A software-defined UE stack, customized to operate with 1 PDCP layer linked to 2 RRC/RLC entities (LCID 4 for DU1, LCID 5 for DU2).
+    \item \textbf{ZeroMQ RF Loopback}: Emulates the physical air interface by passing digital I/Q samples over loopback TCP ports (2000/2001 and 3000/3001) instead of antennas.
+\end{itemize}
+
+The physical-layer parameters configured for both DUs are summarized in Table~\ref{tab:phy_params}.
+
+\begin{table}[htbp]
+\caption{PHY Layer Configuration Parameters}
+\label{tab:phy_params}
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Parameter} & \textbf{Value / Configuration} \\
+\midrule
+Duplex Mode & Paired FDD (Frequency Division Duplex) \\
+Downlink ARFCN & 368500 (Center Frequency: 1842.5 MHz) \\
+Uplink ARFCN & 349500 (Center Frequency: 1747.5 MHz) \\
+NR Operating Band & Band n3 (FR1) \\
+Channel Bandwidth & 10 MHz \\
+BWP Size & 52 Physical Resource Blocks (PRBs) \\
+Numerology ($\mu$) & $\mu = 0$ (15 kHz Subcarrier Spacing) \\
+Symbols per Slot & 14 OFDM symbols (Normal Cyclic Prefix) \\
+K0 / K1 / K2 & 0 / 4 / 4 slots \\
+Modulation & Up to 64-QAM (Downlink and Uplink) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Propagation Delay and Timing Advance}
+Physical distance between the UE and the gNodeB introduces propagation delay. In the ZeroMQ simulation environment, this propagation delay is modeled as a sample-offset shift ($rx\_offset$ or $tx\_offset$) in the srsRAN ZMQ RF driver.
+
+\subsection{1 km Distance Emulation}
+The speed of light is $c \approx 3 \times 10^8\text{ m/s}$. The one-way propagation delay for $d = 1\text{ km}$ is calculated as:
+\begin{equation}
+t_{\text{prop}} = \frac{d}{c} = \frac{1000\text{ m}}{3 \times 10^8\text{ m/s}} \approx 3.33\ \mu\text{s}
+\end{equation}
+
+At the configured cell baseband sample rate of $f_s = 11.52\text{ MHz}$, the delay translates directly to an offset of:
+\begin{equation}
+N_{\text{samples}} = t_{\text{prop}} \times f_s = 3.33\ \mu\text{s} \times 11.52\text{ MHz} \approx 38.4\text{ samples}
+\end{equation}
+
+We configure $rx\_offset = 38$ in the ZMQ arguments for DU2. During the Random Access (RACH) and SCell addition procedures, the DU detects the arriving offset, calculates the Timing Advance (TA), and commands the UE to shift its UL transmission timing. This successfully compensates for the emulated 1 km propagation distance, shifting the UE's internal distance metric to $1.00\text{ km}$.
+
+\section{Non-Terrestrial Network (NTN) Extension}
+To model satellite communications under 3GPP Release 17 specifications, we integrated the `geo_ntn.yml` configuration into the oCUDU testbed. This represents a geostationary (GEO) satellite link operating at an altitude of approximately 35,786 km.
+
+\subsection{GEO Propagation Delay}
+The one-way propagation delay for a GEO satellite is approximately $120\text{ ms}$. At the sample rate of $11.52\text{ MHz}$, this requires a massive sample offset configuration in the RF driver:
+\begin{equation}
+N_{\text{samples\_NTN}} = 120\text{ ms} \times 11.52\text{ MHz} = 1,382,400\text{ samples}
+\end{equation}
+
+To support such large delays, the following protocol modifications are activated:
+\begin{itemize}
+    \item \textbf{cell\_specific\_koffset = 150}: Sets the timing scheduling offsets (K0, K1, K2) to bypass slot scheduling conflicts over the long round-trip path.
+    \item \textbf{SIB19 Broadcasting}: Schedules System Information Block 19 to broadcast the satellite ephemeris position (e.g., $X=20922195$, $Y=1967783$, $Z=19770302$ in ECEF format) and common TA.
+    \item \textbf{Disabled HARQ}: Due to the high RTT, MAC-layer HARQ retransmissions are disabled (\texttt{max\_nof\_harq\_retxs = 0}). Data recovery shifts to the RLC AM ARQ loops.
+    \item \textbf{RRC Procedure Guard Time}: Extended to $12.8\text{ seconds}$ to prevent procedure timeouts during satellite connection handshakes.
+\end{itemize}
+
+\section{MAC/PHY Adaptation vs. Transport Block Loss}
+A key question is the operational difference between continuous physical layer degradation and transient packet drop events.
+
+\subsection{Link Adaptation (AMC)}
+When physical metrics such as SS-RSRP or SS-SINR drop continuously, the UE recalculates and reports a lower Channel Quality Indicator (CQI) to the gNB. The gNB MAC scheduler dynamically adjusts the Modulation and Coding Scheme (MCS) via the Adaptive Modulation and Coding (AMC) loop, dropping from high-order modulations (like 64-QAM) to low-order modulations (like QPSK) to protect block error rate (BLER) targets.
+
+\subsection{Transport Block Dropping}
+In contrast, randomly dropping a Transport Block (TB) at the MAC layer triggers a CRC failure, generating a HARQ NACK and prompting a MAC-layer HARQ retransmission (up to 4 attempts). Because the underlying channel quality remains high, the retransmitted block succeeds quickly. Consequently, the higher RLC and PDCP layers experience $0\%$ overall packet loss, demonstrating that random TB drops do not trigger AMC parameter reconfigurations.
+
+\section{PDCP Custom Split Ratios}
+The original testbed implementation divided traffic equally (1:1 modulo-2 split) between DU1 and DU2. We modified the split-bearer routing logic in \texttt{rlc\_split\_bridge::write\_sdu} inside \texttt{pdcp.h} to allow user-defined split ratios (such as 2:7 or 3:4) configured via the \texttt{PDCP\_SPLIT\_RATIO} environment variable.
+
+\subsection{Design Implementation}
+The implementation uses a static packet counter modulo the total ratio sum. Out of every $A+B$ packets, the first $A$ packets are routed to DU1 and the remaining $B$ packets go to DU2:
+\begin{lstlisting}[language=C++]
+class rlc_split_bridge : public srsue::rlc_interface_pdcp {
+private:
+  bool parsed = false;
+  uint32_t ratio_mn = 1, ratio_sn = 1, total_ratio = 2;
+  void parse_ratio() {
+    char* env_ratio = std::getenv("PDCP_SPLIT_RATIO");
+    if (env_ratio) {
+      int mn = 1, sn = 1;
+      if (sscanf(env_ratio, "%d:%d", &mn, &sn) == 2 && mn >= 0) {
+        ratio_mn = mn; ratio_sn = sn; total_ratio = mn + sn;
+      }
+    }
+    parsed = true;
+  }
+public:
+  void write_sdu(uint32_t lcid, srsran::unique_byte_buffer_t sdu) override {
+    if (lcid < 3) { mn_rlc->write_sdu(lcid, std::move(sdu)); return; }
+    if (!parsed) parse_ratio();
+    static std::atomic<uint32_t> packet_counter{0};
+    uint32_t count = packet_counter++ % total_ratio;
+    bool route_to_mn = (count < ratio_mn);
+    if (route_to_mn) {
+      mn_rlc->write_sdu(lcid, std::move(sdu));
+    } else {
+      sn_rlc->write_sdu(lcid, std::move(sdu));
+    }
+  }
+};
+\end{lstlisting}
+
+\subsection{Experimental Results}
+For an input stream of 18 packets, the actual packet allocations recorded in the UE log are listed in Table~\ref{tab:split_results}.
+
+\begin{table}[htbp]
+\caption{PDCP Split Ratio Routing Verification}
+\label{tab:split_results}
+\centering
+\begin{tabular}{ccc}
+\toprule
+\textbf{Split Ratio} & \textbf{DU1 (LCID 4) Packets} & \textbf{DU2 (LCID 5) Packets} \\
+\midrule
+1:1 & [1, 3, 5, 7, 9, 11, 13, 15, 17] & [2, 4, 6, 8, 10, 12, 14, 16, 18] \\
+3:4 & [1, 2, 3, 8, 9, 10, 15, 16, 17] & [4, 5, 6, 7, 11, 12, 13, 14, 18] \\
+2:7 & [1, 2, 10, 11] & [3, 4, 5, 6, 7, 8, 9, 12..18] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Future Work}
+Building upon these validation results, future work will explore:
+\begin{enumerate}
+    \item \textbf{Dynamic Split Adaptation}: Adjusting traffic ratios dynamically based on realtime SS-SINR/RSRP reports to redirect traffic away from degraded radio paths.
+    \item \textbf{Dual-Connectivity across Terrestrial \& NTN Links}: Evaluating hybrid architectures where the Master Node operates over a high-throughput terrestrial link, and the Secondary Node anchors a reliable LEO/GEO satellite link.
+    \item \textbf{Hardware Testbed Integration}: Porting the modified stack to a physical SDR testbed using USRP devices to evaluate performance in real fading scenarios.
+\end{enumerate}
+
+\section{Conclusion}
+This paper verified the operations of a custom-modified 5G SA Dual Connectivity architecture. We successfully emulated 1 km propagation delays using sample offsets, validated Timing Advance loops, and proved the resilience of MAC HARQ recovery against transient TB losses. We also detailed the integration of a 3GPP Rel-17 NTN GEO satellite link requiring extended slot offsets and disabled MAC HARQ. Finally, we demonstrated a low-latency custom PDCP split bearer forwarding implementation supporting user-defined traffic ratios.
+
+\end{document}

@@ -35,6 +35,26 @@ namespace srsran {
 
 class rlc_split_bridge : public srsue::rlc_interface_pdcp
 {
+private:
+  bool parsed = false;
+  uint32_t ratio_mn = 1;
+  uint32_t ratio_sn = 1;
+  uint32_t total_ratio = 2;
+
+  void parse_ratio()
+  {
+    char* env_ratio = std::getenv("PDCP_SPLIT_RATIO");
+    if (env_ratio) {
+      int mn = 1, sn = 1;
+      if (sscanf(env_ratio, "%d:%d", &mn, &sn) == 2 && mn >= 0 && sn >= 0 && (mn + sn) > 0) {
+        ratio_mn = mn;
+        ratio_sn = sn;
+        total_ratio = mn + sn;
+      }
+    }
+    parsed = true;
+  }
+
 public:
   srsue::rlc_interface_pdcp* mn_rlc = nullptr;
   srsue::rlc_interface_pdcp* sn_rlc = nullptr;
@@ -48,12 +68,19 @@ public:
       return;
     }
 
+    if (!parsed) {
+      parse_ratio();
+    }
+
     static std::atomic<uint32_t> packet_counter{0};
     
     bool mn_full = mn_rlc ? mn_rlc->sdu_queue_is_full(lcid) : true;
     bool sn_full = sn_rlc ? sn_rlc->sdu_queue_is_full(lcid) : true;
 
-    if ((packet_counter++ % 2 == 0 && !mn_full) || sn_full) {
+    uint32_t count = packet_counter++ % total_ratio;
+    bool route_to_mn = (count < ratio_mn);
+
+    if ((route_to_mn && !mn_full) || sn_full) {
       if (mn_rlc) mn_rlc->write_sdu(lcid, std::move(sdu));
     } else {
       if (sn_rlc) sn_rlc->write_sdu(lcid, std::move(sdu));
