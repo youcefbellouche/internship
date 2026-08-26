@@ -49,14 +49,20 @@ Multi-path and multi-connectivity architectures have evolved significantly acros
     \item \textbf{Transition from 4G to 5G (EN-DC)}: Initially, E-UTRA-NR Dual Connectivity (EN-DC) was utilized to bootstrap early 5G deployments. It allowed operators to leverage their existing 4G LTE core and macro base stations (as the Master Node) to handle control plane signaling, while adding 5G NR carriers (as the Secondary Node) to boost user plane data rates without requiring a full Core network upgrade.
     \item \textbf{Exploiting 5G Base Station Density (NR-DC)}: As 5G Standalone networks matured, NR-NR Dual Connectivity (NR-DC) emerged to leverage the dense deployment of next-generation base stations (gNodeBs). By aggregating resources across different frequency bands (e.g., sub-6 GHz for coverage and mmWave for capacity), NR-DC optimizes local throughput, balances scheduler loads, and mitigates blockages.
     \item \textbf{6G and Non-Terrestrial Networks (NTN) Integration}: Looking toward 6G, multi-connectivity becomes essential to exploit satellite-based coverage (LEO, MEO, GEO). MR-DC over hybrid satellite-terrestrial networks mitigates satellite orbital movement, handles high Doppler shifts, cushions signal blockages, and facilitates seamless handovers between satellite beams and terrestrial cells.
+    \item \textbf{O-RAN Topologies (Single vs. Multi-PDCP)}: In integrated Space-Terrestrial Networks (STN), two primary functional topologies are defined based on the placement of the O-RAN Central Unit (O-CU) and Distributed Unit (O-DU) instances:
+    \begin{itemize}
+        \item \textit{Single-PDCP (S-PDCP)}: A single O-CU instance hosts the PDCP entity serving the UE, directly interfacing with both terrestrial and space-based DUs. Split, switch, or duplication choices are coordinated locally.
+        \item \textit{Multi-PDCP (M-PDCP)}: The Master Node (MN) and Secondary Node (SN) host independent O-CU and PDCP entities, routing user plane traffic between them via the 3GPP Xn-U interface.
+    \end{itemize}
+    \item \textbf{Delay Asymmetry Challenges}: Merging terrestrial networks (TN) and non-terrestrial networks (NTN) introduces massive propagation delay differences (e.g., $\approx 0\text{ ms}$ for terrestrial vs. $120\text{ ms}$ for GEO satellites). Under splitting policies, this asymmetry causes out-of-order packet arrival, triggering large reordering windows, Head-of-Line (HoL) blocking at PDCP, and spurious retransmissions at TCP.
 \end{itemize}
 
 \section{Multi-Connectivity Routing Modalities}
 MR-DC architectures offer three primary data routing strategies at the PDCP layer:
 \begin{enumerate}
-    \item \textbf{Switching (Dynamic Path Selection)}: Traffic is dynamically routed through only one active DU path at a time. The path is selected based on channel quality reports, switching path destinations when the secondary link degrades.
-    \item \textbf{Splitting (Split Bearer)}: PDCP packets are distributed across both DU paths simultaneously to aggregate throughput. Our C++ implementation focuses on validating configurable split ratios for asymmetric link capacities.
-    \item \textbf{Duplication (Packet Duplication)}: Identical copies of every PDCP PDU are sent down both paths to guarantee ultra-reliability (URLLC). The receiver PDCP entity delivers the first arrival and drops the duplicate.
+    \item \textbf{Switching (Dynamic Path Selection)}: Traffic is dynamically routed through only one active DU path at a time. The path is selected based on link quality/availability, switching traffic destination to the space segment as a backup when the terrestrial segment is congested or unavailable.
+    \item \textbf{Splitting (Split Bearer)}: PDCP packets are distributed across both DU paths simultaneously to aggregate throughput. A key challenge is managing the transmission ratio to prevent the terrestrial segment from overwhelming the slower satellite link, highlighting the need for configurable ratio controllers.
+    \item \textbf{Duplication (Packet Duplication)}: Identical copies of every PDCP PDU are sent down both paths to guarantee ultra-reliability (URLLC). The receiver PDCP entity delivers the first arrival and drops the duplicate, protecting the connection against transient terrestrial fading or shadow blockages.
 \end{enumerate}
 
 \section{System Architecture \& Custom Modifications}

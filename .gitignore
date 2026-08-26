@@ -2,3 +2,7 @@
 **/build/
 *.log
 *.pcap
+
+# Ignore reference literature directories
+Adaptive Cross-Layer Recovery for PDCP Split Bearers in space-terrestrial Multi-Connectivity/
+O-RAN Integrated Space-Terrestrial Networks_ A Multi-Connectivity Strategy Analysis/
