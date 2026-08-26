@@ -68,6 +68,14 @@ MR-DC architectures offer three primary data routing strategies at the PDCP laye
 \section{System Architecture \& Custom Modifications}
 To validate split-bearer and duplication routing, the srsue user plane stack was modified. A custom C++ class, \texttt{rlc\_split\_bridge}, was introduced in \texttt{pdcp.h} to act as a routing controller. Rather than splitting traffic equally (1:1), the controller parses the \texttt{PDCP\_SPLIT\_RATIO} environment variable at runtime to route traffic according to configured ratios (e.g., 2:7 or 3:4).
 
+\subsection{Multi-Connectivity UE Architecture}
+To implement MR-DC within a single software-defined process, the UE protocol stack is structured to run two parallel lower-stack instances (the Master Cell Group - MCG and the Secondary Cell Group - SCG) mapped to separate configuration files:
+\begin{itemize}
+    \item \textbf{Master Leg (ue\_mn.conf)}: Handles the primary connection (MCG), establishing the control plane anchor (RRC) and data transport through DU1.
+    \item \textbf{Secondary Leg (ue\_sn.conf)}: Handles the secondary connection (SCG), managing independent RF frequencies, port mapping, and data routing through DU2.
+\end{itemize}
+These parallel physical, MAC, and RLC layers converge at a single, unified PDCP instance, which coordinates reordering, duplicate discarding, and custom ratio splitting.
+
 \subsection{C++ Split Controller Implementation}
 The implementation distributes packets modulo the total ratio sum. Out of every $A+B$ packets, the first $A$ are routed to DU1 (`mn_rlc`) and the remaining $B$ are routed to DU2 (`sn_rlc`):
 \begin{lstlisting}[language=C++]
