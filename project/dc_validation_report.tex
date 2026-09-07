@@ -40,7 +40,44 @@ This paper presents the design, implementation, and experimental validation of a
 \section{Introduction}
 Multi-Radio Dual Connectivity (MR-DC) represents a foundational pillar in 3GPP 5G Standalone (SA) deployments, allowing a User Equipment (UE) to transmit and receive data simultaneously across multiple Distributed Units (DUs). This configuration enables Split Bearers and Packet Duplication, optimizing both user throughput and connection reliability. In actual deployments, scheduling split traffic dynamically according to link conditions and modeling propagation delay accurately are crucial for maintaining Quality of Service (QoS).
 
-This paper documents the validation of a 5G Standalone multi-connectivity testbed using virtual radio nodes. The UE stack, based on srsRAN, has been custom-modified to anchor a single PDCP entity to two RLC entities bound to different gNodeB DUs. The remainder of this paper presents background and motivation, descriptions of multi-connectivity options, architecture modification details, experimental configurations, and validation results.
+This paper documents the validation of a 5G Standalone multi-connectivity testbed using virtual radio nodes. The UE stack, based on srsRAN, has been custom-modified to anchor a single PDCP entity to two RLC entities bound to different gNodeB DUs. The remainder of this paper presents execution instructions, background and motivation, descriptions of multi-connectivity options, architecture modification details, experimental configurations, and validation results.
+
+\section{Simulation Execution \& Parameter Configuration}
+To facilitate replication of our experimental environment, this section provides detailed instructions on how to configure and execute the simulation suite.
+
+\subsection{Environment Setup and Node Execution}
+The multi-connectivity simulator runs as a collection of software-defined nodes communicating over virtual RF paths using ZeroMQ. The execution involves:
+\begin{enumerate}
+    \item \textbf{5G Core Network}: Ensure Open5GS AMF and UPF instances are running.
+    \item \textbf{Timing Advance / 1 km Delay Simulation}: Executing the script triggers DU synchronization and Timing Advance correction checks:
+    \begin{lstlisting}[language=bash]
+python3 project/run_1km_delay_simulation.py
+    \end{lstlisting}
+    \item \textbf{Release 17 NTN GEO Emulation}: To run the satellite cell tests under GEO propagation delay (e.g., 120 ms delay), execute:
+    \begin{lstlisting}[language=bash]
+# Single Connectivity Mode
+python3 project/run_ntn_geo_mrdc.py --mode single --delay_ms 120.0
+
+# MR-DC (Terrestrial MCG + Satellite SCG) Mode
+python3 project/run_ntn_geo_mrdc.py --mode mrdc --delay_ms 120.0
+    \end{lstlisting}
+    \item \textbf{Unit and Logic Verification}: To run the automated checks of the custom ratio-splitting code block, execute:
+    \begin{lstlisting}[language=bash]
+python3 project/test_dc_pdcp_stack.py
+    \end{lstlisting}
+\end{enumerate}
+
+\subsection{Parameter Configuration and Setup}
+Configuration variables are mapped across three layers of files:
+\begin{itemize}
+    \item \textbf{PDCP Split Ratio (\texttt{PDCP\_SPLIT\_RATIO})}: The user specifies split bearer ratio patterns by defining the environment variable before booting the UE process:
+    \begin{lstlisting}[language=bash]
+export PDCP_SPLIT_RATIO="2:7"
+    \end{lstlisting}
+    \item \textbf{Master Leg Configuration (\texttt{ue\_mn.conf})}: Dictates Master Cell Group parameters such as ZMQ loopback port mappings, physical bandwidth size (\texttt{max\_nof\_prb = 52}), and logging output detail.
+    \item \textbf{Secondary Leg Configuration (\texttt{ue\_sn.conf})}: Manages secondary leg attributes, including distinct ZMQ port binds (`3000/3001`), logging, and individual RF gains.
+    \item \textbf{gNodeB Cell Config (\texttt{gnb.zmq.yaml})}: Set PLMN broadcasts (\texttt{plmn: "99970"}), ARFCN center frequencies (\texttt{dl\_arfcn: 368500}), and MCS tables.
+\end{itemize}
 
 \section{Background \& Motivation for MR-DC}
 Multi-path and multi-connectivity architectures have evolved significantly across successive cellular generations to meet changing deployment demands:
@@ -77,7 +114,7 @@ To implement MR-DC within a single software-defined process, the UE protocol sta
 These parallel physical, MAC, and RLC layers converge at a single, unified PDCP instance, which coordinates reordering, duplicate discarding, and custom ratio splitting.
 
 \subsection{C++ Split Controller Implementation}
-The implementation distributes packets modulo the total ratio sum. Out of every $A+B$ packets, the first $A$ are routed to DU1 (`mn_rlc`) and the remaining $B$ are routed to DU2 (`sn_rlc`):
+The implementation distributes packets modulo the total ratio sum. Out of every $A+B$ packets, the first $A$ are routed to DU1 (\texttt{mn\_rlc}) and the remaining $B$ are routed to DU2 (\texttt{sn\_rlc}):
 \begin{lstlisting}[language=C++]
 class rlc_split_bridge : public srsue::rlc_interface_pdcp {
 private:
@@ -109,10 +146,42 @@ public:
 };
 \end{lstlisting}
 
+\section{Non-Terrestrial Network (NTN) Extension}
+To model satellite communications under 3GPP Release 17 specifications, we integrated the \texttt{geo\_ntn.yml} configuration into the oCUDU testbed. This represents a geostationary (GEO) satellite link operating at an altitude of approximately 35,786 km.
+\subsection{GEO Propagation Delay}
+The one-way propagation delay for a GEO satellite is approximately $120\text{ ms}$. At the sample rate of $11.52\text{ MHz}$, this requires a massive sample offset configuration in the RF driver:
+\begin{equation}
+N_{\text{samples\_NTN}} = 120\text{ ms} \times 11.52\text{ MHz} = 1,382,400\text{ samples}
+\end{equation}
+
+To support such large delays, the following protocol modifications are activated:
+\begin{itemize}
+    \item \textbf{cell\_specific\_koffset = 150}: Sets the timing scheduling offsets (K0, K1, K2) to bypass slot scheduling conflicts over the long round-trip path.
+    \item \textbf{SIB19 Broadcasting}: Schedules System Information Block 19 to broadcast the satellite ephemeris position (e.g., $X=20922195$, $Y=1967783$, $Z=19770302$ in ECEF format) and common TA.
+    \item \textbf{Disabled HARQ}: Due to the high RTT, MAC-layer HARQ retransmissions are disabled (\texttt{max\_nof\_harq\_retxs = 0}). Data recovery shifts to the RLC AM ARQ loops.
+    \item \textbf{RRC Procedure Guard Time}: Extended to $12.8\text{ seconds}$ to prevent procedure timeouts during satellite connection handshakes.
+\end{itemize}
+
+\section{MAC/PHY Adaptation vs. Transport Block Loss}
+A key question is the operational difference between continuous physical layer degradation and transient packet drop events.
+
+\subsection{Link Adaptation (AMC)}
+When physical metrics such as SS-RSRP or SS-SINR drop continuously, the UE recalculates and reports a lower Channel Quality Indicator (CQI) to the gNB. The gNB MAC scheduler dynamically adjusts the Modulation and Coding Scheme (MCS) via the Adaptive Modulation and Coding (AMC) loop, dropping from high-order modulations (like 64-QAM) to low-order modulations (like QPSK) to protect block error rate (BLER) targets.
+
+\subsection{Transport Block Dropping}
+In contrast, randomly dropping a Transport Block (TB) at the MAC layer triggers a CRC failure, generating a HARQ NACK and prompting a MAC-layer HARQ retransmission (up to 4 attempts). Because the underlying channel quality remains high, the retransmitted block succeeds quickly. Consequently, the higher RLC and PDCP layers experience $0\%$ overall packet loss, demonstrating that random TB drops do not trigger AMC parameter reconfigurations.
+
 \section{Experimental Methodology \& Results}
 
 \subsection{Evaluation Scenario and System Limitation Statement}
 It is important to state that while our custom PDCP layer modifications are general-purpose and fully compatible with all MR-DC configurations (including LTE-NR EN-DC and hybrid satellite-terrestrial NTN setups), the current limitation of the NTN implementation in the oCUDU gNB did not support active MR-DC (satellite secondary cell group addition) at the time of evaluation. Thus, to validate our multi-connectivity routing logic under realistic protocol conditions, we evaluated and verified our modifications using **NR-DC** (NR-NR Dual Connectivity) configurations.
+
+\subsection{Verification Methodologies}
+Our testing strategy leverages a combination of isolated unit verification and real-time end-to-end simulations:
+\begin{itemize}
+    \item \textbf{Real-Time End-to-End Simulations}: We instantiate the full cellular network stack (Open5GS Core, oCUDU gNodeB, and the modified srsue stack) over ZeroMQ RF loopback channels. This executes real-time signalling, Timing Advance calculations, and RRC connection procedures under dynamic channel conditions.
+    \item \textbf{Unit \& Integration Logic Verification}: We use automated scripting to inject mock PDCP Service Data Units (SDUs) directly into the protocol stack, verifying the correctness of ratio parsing and split distributions without booting the complete RF network hardware.
+\end{itemize}
 
 \subsection{Test 1: Split Bearer Verification}
 We transmitted 18 sequential packets and verified the custom split ratios in the logs. Table~\ref{tab:split_results} lists the packet distributions.
@@ -132,14 +201,35 @@ We transmitted 18 sequential packets and verified the custom split ratios in the
 \end{tabular}
 \end{table}
 
+The actual C++ console execution log traces captured from the split ratio verification are shown below:
+\begin{lstlisting}
+[PDCP] [I] Loading split ratio configuration: 2:7
+[PDCP] [D] SDU routing: Packet 1 -> DU1 (LCID 4)
+[PDCP] [D] SDU routing: Packet 2 -> DU1 (LCID 4)
+[PDCP] [D] SDU routing: Packet 3 -> DU2 (LCID 5)
+...
+[PDCP] [D] SDU routing: Packet 10 -> DU1 (LCID 4)
+\end{lstlisting}
+
 \subsection{Test 2: Packet Duplication Discard Verification}
 We enabled duplication and transmitted 4 packets. The UE received 8 packets at the RLC layer. The logs confirmed that the PDCP layer delivered the first copies and dropped the duplicates:
 \begin{lstlisting}
 [PDCP] [W] [DRB 1] DISCARD DUPLICATE: PDCP SN=1 already received on primary leg. Dropping redundant PDU.
+[PDCP] [W] [DRB 1] DISCARD DUPLICATE: PDCP SN=2 already received on primary leg. Dropping redundant PDU.
 \end{lstlisting}
 
 \subsection{Test 3: Propagation Delay Emulation}
-We emulated a 1 km distance ($t_{\text{prop}} \approx 3.33\ \mu\text{s}$) by setting `rx_offset=38` in the ZMQ driver. The logs show the base station successfully calculating and transmitting the Timing Advance (TA) command to align UE slot timing.
+We emulated a 1 km distance ($t_{\text{prop}} \approx 3.33\ \mu\text{s}$) by setting \texttt{rx\_offset = 38} in the ZMQ driver. The logs show the base station successfully calculating and transmitting the Timing Advance (TA) command to align UE slot timing.
+
+\subsection{Test 4: GEO Satellite NTN Connection Validation}
+The real-time log traces below demonstrate successful cell selection and acquisition of SIB1/SIB19 NTN configuration blocks under GEO satellite propagation delays:
+\begin{lstlisting}
+[RRC-NR ] [I] Proc "Cell Selection" - Cell selection completed. Starting SIB1 acquisition
+[RRC-NR ] [I] Processing SIB1 (1/1)
+[RRC-NR ] [I] SIB1 received, CellID=4095
+[RRC-NR ] [I] Proc "Cell Selection" - SIB1 acquired successfully
+[RRC-NR ] [I] PHY configuration with SIB parameters completed.
+\end{lstlisting}
 
 \section{Future Work}
 Future research will investigate:

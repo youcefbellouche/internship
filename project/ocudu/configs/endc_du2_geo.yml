@@ -1,0 +1,74 @@
+# Configuration for DU2 operating as a 3GPP Rel-17 NTN GEO Satellite Node
+# Delay: 120 ms (rx_offset = 1,382,400 samples at 11.52 MHz)
+gnb_du_id: 2
+f1ap:
+  addrs: 127.0.10.1
+  bind_addrs: 127.0.10.3
+f1u:
+  socket:
+    - bind_addr: 127.0.10.3
+ru_sdr:
+  device_driver: zmq
+  device_args: tx_port=tcp://127.0.0.1:3000,rx_port=tcp://127.0.0.1:3001,base_srate=11.52e6,rx_offset=1382400
+  srate: 11.52
+cell_cfg:
+  sector_id: 2
+  dl_arfcn: 368500
+  band: 3
+  channel_bandwidth_MHz: 10
+  common_scs: 15
+  plmn: "99970"
+  tac: 1
+  pci: 2
+  ntn:
+    cell_specific_koffset: 150
+    epoch_timestamp: "2026-01-01T00:00:00"
+    ta_info:
+      ta_common: 0
+    ephemeris_info_ecef:
+      pos_x: 20922195
+      pos_y: 1967783
+      pos_z: 19770302
+      vel_x: 0
+      vel_y: 0
+      vel_z: 0
+  sib:
+    si_window_length: 5
+    si_sched_info:
+      - si_period: 16
+        sib_mapping: [2]
+      - si_period: 16
+        sib_mapping: [19]
+        si_window_position: 2
+    sib2:
+      q_hyst: 3
+      thresh_serving_low_p: 0
+      cell_reselection_priority: 6
+      q_rx_lev_min: -70
+      s_intra_search_p: 62
+      t_reselection_nr: 1
+  pucch:
+    sr_period_ms: 320
+  csi:
+    csi_rs_period: 80
+  pdcch:
+    common:
+      ss0_index: 0
+      coreset0_index: 6
+    dedicated:
+      ss2_type: common
+      dci_format_0_1_and_1_1: false
+  prach:
+    prach_config_index: 1
+    total_nof_ra_preambles: 64
+    nof_ssb_per_ro: 1
+    nof_cb_preambles_per_ssb: 64
+    max_msg3_harq_retx: 0
+  pdsch:
+    mcs_table: qam64
+    max_nof_harq_retxs: 0
+  pusch:
+    mcs_table: qam64
+log:
+  filename: /tmp/endc_du2.log
+  all_level: debug
