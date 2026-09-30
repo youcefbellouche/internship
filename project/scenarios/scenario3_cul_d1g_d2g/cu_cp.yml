@@ -1,0 +1,24 @@
+# Scenario 3: CU_L D1_g D2_g - CU-CP Configuration
+# CU Location: LEO Satellite
+
+cu_cp:
+  request_pdu_session_timeout: 30
+  inactivity_timer: 7200
+  amf:
+    addrs: 127.0.0.5
+    bind_addrs: 127.0.0.1
+    supported_tracking_areas:
+    - tac: 1
+      plmn_list:
+      - plmn: '99970'
+        tai_slice_support_list:
+        - sst: 1
+  e1ap:
+    bind_addrs: 127.0.20.1
+  f1ap:
+    bind_addrs: 127.0.10.1
+  rrc:
+    rrc_procedure_guard_time_ms: 12800
+log:
+  filename: /tmp/scenario3_cul_d1g_d2g_cu_cp.log
+  all_level: debug

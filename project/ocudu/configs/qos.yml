@@ -344,7 +344,7 @@ qos:
         status_report_required: false
       rx:
         sn: 18
-        t_reordering: 220
+        t_reordering: 15
         out_of_order_delivery: false
     f1u_cu_up:
       backoff_timer: 5

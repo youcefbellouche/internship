@@ -2,7 +2,14 @@
 **/build/
 *.log
 *.pcap
+*Zone.Identifier*
+__pycache__/
+*.pyc
 
 # Ignore reference literature directories
 Adaptive Cross-Layer Recovery for PDCP Split Bearers in space-terrestrial Multi-Connectivity/
 O-RAN Integrated Space-Terrestrial Networks_ A Multi-Connectivity Strategy Analysis/
+
+# Ignore new latex files in project
+project/architectural_description.tex
+project/Sections/

@@ -1,0 +1,147 @@
+Total slides found: 11
+
+==================== SLIDE 1 ====================
+SUMMER INTERNSHIP PRESENTATION
+Multi-Connectivity and NTN in oCUDU and srsue
+Practical Design, Protocol Stack Re-Engineering, and Empirical Validation on Disaggregated 5G Platforms
+PRESENTER
+Youcef Bellouche
+COLLABORATORS
+Stefano Taborelli, Pedro B.
+Velloso
+, Stefano
+Secci
+INSTITUTIONS
+CNAM (Paris)
+
+==================== SLIDE 2 ====================
+Onjective of the internship
+First working open-source dual-stack UE implementation.
+Validated 6 distinct space-ground deployment architectures.
+Modeled full 3GPP Release 17 NTN delays and offsets for LEO and GEO.
+
+==================== SLIDE 3 ====================
+Why
+oCUDU
+and
+srsue
+?
+The Open-Source Imperative
+Architectural Match
+100% Free architecture.
+Full access to every layer without proprietary constraints.
+Community-driven transparency.
+Complete inspection of internal protocol states.
+Unrestricted refactoring.
+Deep architectural changes prohibited by commercial stacks.
+oCUDU
+Disaggregated network side. Clean separation of CU-CP, CU-UP, and DUs across F1 and E1 interfaces.
+srsue
+Full-stack software UE. Capable of flexible, real-time radio emulation and complex modification.
+
+==================== SLIDE 4 ====================
+Before vs. After
+BASELINE STACK
+TRANSFORMED STACK
+Network Side
+Strict 1:1 single connectivity. One CU supervised a single DU.
+UE Side
+Strictly linear pipeline. One Radio, MAC, RLC, and PDCP layer.
+The Deadlock
+Dual UE apps caused OS IP address conflicts and collisions.
+Network Orchestration
+1 CU dynamically orchestrates 2 independent DUs.
+Dual Stack
+Simultaneous parallel radio legs in one application process.
+MR-DC compliant
+Shared PDCP memory layer handles splitting and reordering.
+
+==================== SLIDE 5 ====================
+HOW WE MODIFIED THE CODEBASE
+Core Engineering Achievements
+Unified Execution
+Master and secondary connections in one app. Zero Linux namespace conflicts.
+In-Memory Delivery
+Direct PDCP buffer routing. Zero intermediate network delays or socket overhead.
+Control Protection
+All vital RLC signaling routed strictly through the isolated master cell.
+Standard Compatibility
+Operates over standard F1/E1. Zero changes required to the Open5GS core.
+
+==================== SLIDE 6 ====================
+Multi-Connectivity Modalities
+Split Bearer
+THROUGHPUT AGGREGATION
+Packet Duplication
+ULTRA-RELIABILITY
+Dynamic Switching
+INSTANT FAILOVER
+Simultaneous distribution across DU1 and DU2.
+User-configurable ratios (1:1, 2:7, 3:4).
+Active congestion avoidance redirects full queues.
+Simultaneous identical transmission across paths.
+PDCP accepts first-arrival payload.
+Seamless automatic duplicate discard.
+100% unilateral routing through active leg.
+Secondary leg kept synchronized in background.
+Instant ground-to-space failover without teardown.
+
+==================== SLIDE 7 ====================
+NON-TERRESTRIAL NETWORK (NTN) MODELING
+3GPP Release 17
+3GPP TR 38.821 - Solutions for NR to support non-terrestrial networks (NTN)
+Scheduling Offsets
+Release 17 slot scheduling offsets prevent uplink grants from expiring prematurely.
+Ephemeris Broadcast
+SIB19 broadcasts 3D satellite position coordinates and velocities direct to device.
+HARQ Optimization
+Disabled standard stop-and-wait retransmissions to prevent buffer latency freezes.
+Extended Guard Timers
+Procedural timers extended from 5 seconds to 12.8 seconds for space propagation.
+LEO PROFILE
+7 ms
+One way delay
+600 km altitude • 28,800 software samples.
+GEO PROFILE
+240 ms
+One way delay
+35,786 km altitude • 1,382,400 software samples.
+
+==================== SLIDE 8 ====================
+5
+Space & Ground Architectures
+S. Taborelli, F. Veisi, P. B. Velloso and S. Secci, "O-RAN Integrated Space-Terrestrial Networks: A Multi-Connectivity Strategy Analysis," IEEE INFOCOM 2026, Tokyo, Japan, 2026,
+
+==================== SLIDE 9 ====================
+Empirical Validation Results
+Full End-to-End Setup
+Integrated Open5GS Core, disaggregated oCUDU nodes, and monolithic dual-stack UE over software radio channels.
+Key Architectural Insight
+Terrestrial anchoring bypasses strict device delay requirements. Commercial devices instantly attach to the zero-delay ground cell, unlocking high-throughput satellite aggregation immediately.
+3–5s Establishment
+PDU sessions connect reliably across all scenarios.
+Data Verification
+End-to-end ICMP ping traffic confirms seamless routing.
+50/50 Splitting
+Clean packet alternation confirmed in protocol logs.
+
+==================== SLIDE 10 ====================
+Roadmap: Future Research
+Dynamic multi-connectivity scerion driven by SINR using collected data.
+Integrated constellation dynamic
+Physical SDR hardware deployment (USRP).
+
+==================== SLIDE 11 ====================
+CHANNEL PHYSICS & TARGETS
+Physical Layer Specifications
+0.25 ms Slot Duration (60 kHz)
+Numerology 2. A 5ms delay spans 20 slots.
+Band n78 Terrestrial (3.5 GHz)
+100 MHz bandwidth, TDD architecture.
+Band n256 Space (S-Band)
+UL: 1980–2010 MHz, DL: 2170–2200 MHz, FDD.
+Link Adaptation
+SINR dynamically guides base station modulation downscaling (64-QAM to robust QPSK) under poor link conditions.
+Disconnection Handling
+Loss of satellite visibility triggers internal out-of-sync counters for clean radio link failure and session re-establishment.
+
