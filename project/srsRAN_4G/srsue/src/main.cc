@@ -83,6 +83,14 @@ static void parse_simple_sn_config(const std::string& filename, all_args_t* args
         args_sn->rf.device_args = val;
       } else if (key == "imsi") {
         args_sn->stack.usim.imsi = val;
+      } else if (key == "bands") {
+        args_sn->stack.rrc_nr.supported_bands_nr_str = val;
+      } else if (key == "dl_nr_arfcn") {
+        args_sn->stack.rrc_nr.dl_nr_arfcn = std::stoul(val);
+      } else if (key == "ssb_nr_arfcn") {
+        args_sn->stack.rrc_nr.ssb_nr_arfcn = std::stoul(val);
+      } else if (key == "nof_prb" || key == "max_nof_prb") {
+        args_sn->stack.rrc_nr.nof_prb = std::stoul(val);
       }
     }
   }

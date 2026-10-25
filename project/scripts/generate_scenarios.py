@@ -19,9 +19,9 @@ SCENARIOS_DIR = os.path.join(BASE_DIR, "scenarios")
 
 # LEO Orbital & Channel Constants (600-800 km altitude, 750 km slant range)
 LEO_ALTITUDE_KM = 600.0
-LEO_ONE_WAY_DELAY_MS = 2.5  # 2.5 ms one-way delay (5 ms RTT, fits within 10-slot RAR window)
-BASE_SRATE_HZ = 11.52e6
-LEO_RX_OFFSET_SAMPLES = int((LEO_ONE_WAY_DELAY_MS / 1000.0) * BASE_SRATE_HZ)  # 28,800 samples
+LEO_ONE_WAY_DELAY_MS = 7.0  # 7 ms one-way slant delay (14 ms RTT)
+BASE_SRATE_HZ = 23.04e6
+LEO_RX_OFFSET_SAMPLES = int((LEO_ONE_WAY_DELAY_MS / 1000.0) * BASE_SRATE_HZ)  # 161,280 samples
 LEO_K_OFFSET = 6  # 6 slots for RTT scheduling offset
 
 SCENARIO_SPECS = {
@@ -94,14 +94,48 @@ def build_cu_cp_config(cu_mode: str, scenario_name: str) -> dict:
             "filename": f"/tmp/{scenario_name}_cu_cp.log",
             "all_level": "debug",
         },
+        "qos": [
+            {
+                "five_qi": 9,
+                "pdcp": {
+                    "tx": {
+                        "sn": 18,
+                        "discard_timer": -1,
+                        "status_report_required": False,
+                    },
+                    "rx": {
+                        "sn": 18,
+                        "t_reordering": 100,
+                        "out_of_order_delivery": False,
+                    },
+                },
+                "f1u_cu_up": {"backoff_timer": 5},
+                "f1u_du": {"backoff_timer": 5},
+                "rlc": {
+                    "mode": "am",
+                    "am": {
+                        "tx": {
+                            "sn": 18,
+                            "t-poll-retransmit": 100,
+                            "max-retx-threshold": 32,
+                            "poll-pdu": -1,
+                            "poll-byte": -1,
+                            "queue-size": 16384,
+                            "queue-bytes": 6172672,
+                        },
+                        "rx": {
+                            "sn": 18,
+                            "t-reassembly": 15,
+                            "t-status-prohibit": 10,
+                        },
+                    },
+                },
+            }
+        ],
     }
 
-    if cu_mode == "L":
-        # Spaceborne LEO CU: Extended RRC procedure guard timer to tolerate Feeder Link RTT
-        cfg["cu_cp"]["rrc"] = {"rrc_procedure_guard_time_ms": 12800}
-    else:
-        # Ground CU: Standard guard timer
-        cfg["cu_cp"]["rrc"] = {"rrc_procedure_guard_time_ms": 5000}
+    # Extended RRC procedure guard timer for robust multi-connectivity signaling
+    cfg["cu_cp"]["rrc"] = {"rrc_procedure_guard_time_ms": 12800}
 
     return cfg
 
@@ -126,9 +160,11 @@ def build_cu_up_config(scenario_name: str) -> dict:
 def build_du_config(
     du_id: int, mode: str, scenario_name: str, tx_port: int, rx_port: int, bind_ip: str
 ) -> dict:
-    device_args = f"tx_port=tcp://127.0.0.1:{tx_port},rx_port=tcp://127.0.0.1:{rx_port},base_srate=11.52e6"
+    band = 3 if du_id == 1 else 2
+    dl_arfcn = 368500 if du_id == 1 else 386000
+    device_args = f"tx_port=tcp://127.0.0.1:{tx_port},rx_port=tcp://127.0.0.1:{rx_port},base_srate=23.04e6"
     if mode == "L" and du_id == 2:
-        # Inject LEO propagation delay on secondary payload beam (DU2)
+        # Inject LEO slant delay on secondary payload beam (DU2)
         device_args += f",rx_offset={LEO_RX_OFFSET_SAMPLES}"
 
     cfg = {
@@ -138,22 +174,24 @@ def build_du_config(
         "ru_sdr": {
             "device_driver": "zmq",
             "device_args": device_args,
-            "srate": 11.52,
+            "srate": 23.04,
+            "tx_gain": 0,
+            "rx_gain": 0,
         },
         "cell_cfg": {
             "sector_id": du_id,
-            "dl_arfcn": 368500,
-            "band": 3,
-            "channel_bandwidth_MHz": 10,
+            "dl_arfcn": dl_arfcn,
+            "band": band,
+            "channel_bandwidth_MHz": 20,
             "common_scs": 15,
             "plmn": "99970",
             "tac": 1,
             "pci": du_id,
             "pdcch": {
-                "common": {"ss0_index": 0, "coreset0_index": 6},
+                "common": {"ss0_index": 0, "coreset0_index": 12},
                 "dedicated": {
-                    "ss2_type": "common",
-                    "dci_format_0_1_and_1_1": False,
+                    "ss2_type": "ue_dedicated",
+                    "dci_format_0_1_and_1_1": True,
                 },
             },
             "prach": {
@@ -162,14 +200,27 @@ def build_du_config(
                 "nof_ssb_per_ro": 1,
                 "nof_cb_preambles_per_ssb": 64,
             },
-            "pdsch": {"mcs_table": "qam64"},
-            "pusch": {"mcs_table": "qam64"},
+            "pdsch": {
+                "mcs_table": "qam256",
+                "min_ue_mcs": 25,
+                "max_ue_mcs": 26,
+                "nof_harqs": 16,
+            },
+            "pusch": {
+                "mcs_table": "qam256",
+                "max_ue_mcs": 28,
+                "nof_harqs": 16,
+            },
         },
         "log": {
             "filename": f"/tmp/{scenario_name}_du{du_id}.log",
             "all_level": "debug",
         },
     }
+
+    if mode == "L":
+        cfg["cell_cfg"]["pdsch"]["max_nof_harq_retxs"] = 0
+        cfg["cell_cfg"]["pusch"]["max_nof_harq_retxs"] = 0
 
     if mode == "L" and du_id == 2:
         # LEO Satellite Secondary Payload Beam (DU2):
@@ -205,7 +256,6 @@ def build_du_config(
         cfg["cell_cfg"]["pucch"] = {"sr_period_ms": 320}
         cfg["cell_cfg"]["csi"] = {"csi_rs_period": 80}
         cfg["cell_cfg"]["pdsch"]["max_nof_harq_retxs"] = 0
-        cfg["cell_cfg"]["prach"]["max_msg3_harq_retx"] = 0
 
     return cfg
 

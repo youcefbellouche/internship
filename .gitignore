@@ -11,5 +11,7 @@ Adaptive Cross-Layer Recovery for PDCP Split Bearers in space-terrestrial Multi-
 O-RAN Integrated Space-Terrestrial Networks_ A Multi-Connectivity Strategy Analysis/
 
 # Ignore new latex files in project
-project/architectural_description.tex
+project/*.tex
 project/Sections/
+.agents/
+project/scripts/git_branch_push.py

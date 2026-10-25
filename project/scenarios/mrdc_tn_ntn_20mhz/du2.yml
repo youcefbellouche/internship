@@ -1,0 +1,50 @@
+# MR-DC Scenario: DU2 (Non-Terrestrial NTN, Band 2, 20 MHz, SCS 15 kHz, 7 ms delay, HARQ retx=0)
+gnb_du_id: 2
+f1ap:
+  addrs: 127.0.10.1
+  bind_addrs: 127.0.10.3
+f1u:
+  socket:
+  - bind_addr: 127.0.10.3
+ru_sdr:
+  device_driver: zmq
+  device_args: tx_port=tcp://127.0.0.1:3000,rx_port=tcp://127.0.0.1:3001,base_srate=23.04e6,rx_offset=161280
+  srate: 23.04
+  tx_gain: 0
+  rx_gain: 0
+cell_cfg:
+  sector_id: 2
+  dl_arfcn: 386000
+  band: 2
+  channel_bandwidth_MHz: 20
+  common_scs: 15
+  plmn: '99970'
+  tac: 1
+  pci: 2
+  pdcch:
+    common:
+      ss0_index: 0
+      coreset0_index: 12
+    dedicated:
+      ss2_type: ue_dedicated
+      dci_format_0_1_and_1_1: true
+  prach:
+    prach_config_index: 1
+    total_nof_ra_preambles: 64
+    nof_ssb_per_ro: 1
+    nof_cb_preambles_per_ssb: 64
+    max_msg3_harq_retx: 0
+  pdsch:
+    mcs_table: qam256
+    min_ue_mcs: 25
+    max_ue_mcs: 26
+    max_nof_harq_retxs: 0
+    nof_harqs: 16
+  pusch:
+    mcs_table: qam256
+    max_nof_harq_retxs: 0
+    max_ue_mcs: 28
+    nof_harqs: 16
+log:
+  filename: /tmp/mrdc_tn_ntn_20mhz_du2.log
+  all_level: debug

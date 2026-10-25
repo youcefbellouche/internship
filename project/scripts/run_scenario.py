@@ -70,6 +70,17 @@ def parse_args():
         help="Number of ping ICMP packets to send (default: 10)",
     )
     parser.add_argument(
+        "--ratio",
+        type=str,
+        default="1:1",
+        help="PDCP bearer split ratio: 1:1 (Split), dup (Duplication), 1:0, 0:1 (default: 1:1)",
+    )
+    parser.add_argument(
+        "--benchmark",
+        action="store_true",
+        help="Execute 5MB HTTP bidirectional benchmark and report DL/UL line-rate throughput",
+    )
+    parser.add_argument(
         "--keep-alive",
         action="store_true",
         help="Keep processes running after test instead of cleaning up",
@@ -79,11 +90,15 @@ def parse_args():
 
 def cleanup():
     """Kill all lingering simulation processes and restore terminal state."""
-    subprocess.run("sudo pkill -9 -f ocucp || true", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    subprocess.run("sudo pkill -9 -f ocuup || true", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    subprocess.run("sudo pkill -9 -f odu || true", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    subprocess.run("sudo pkill -9 -f srsue || true", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    subprocess.run("stty sane 2>/dev/null || true", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    cleanup_sh = os.path.join(BASE_DIR, "scripts/cleanup.sh")
+    if os.path.exists(cleanup_sh):
+        subprocess.run(f"sudo bash {cleanup_sh} >/dev/null 2>&1 || true", shell=True)
+    else:
+        subprocess.run("sudo pkill -9 -f ocucp || true", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run("sudo pkill -9 -f ocuup || true", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run("sudo pkill -9 -f odu || true", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run("sudo pkill -9 -f srsue || true", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run("stty sane 2>/dev/null || true", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     time.sleep(1)
 
 
@@ -153,7 +168,7 @@ def diagnose_failure(scenario_name: str) -> str:
     return " | ".join(reasons)
 
 
-def run_single_scenario(scenario_key: str, timeout: int, ping_count: int, keep_alive: bool) -> dict:
+def run_single_scenario(scenario_key: str, timeout: int, ping_count: int, keep_alive: bool, ratio: str = "1:1", benchmark: bool = False) -> dict:
     if scenario_key not in SCENARIO_MAP:
         raise ValueError(f"Unknown scenario: {scenario_key}")
 
@@ -168,17 +183,27 @@ def run_single_scenario(scenario_key: str, timeout: int, ping_count: int, keep_a
     print("\n" + "=" * 75)
     print(f"[*] RUNNING SCENARIO TEST: {scenario_name}")
     print(f"[*] Configuration Path:    {scen_dir}")
+    print(f"[*] PDCP Bearer Ratio:     {ratio}")
     print("=" * 75 + "\n")
 
     cleanup()
     setup_environment()
 
+    # Set PDCP ratio in control file
+    try:
+        with open("/tmp/pdcp_split_ratio", "w") as f:
+            f.write(ratio.strip() + "\n")
+    except Exception:
+        pass
+
     result = {
         "scenario": scenario_name,
+        "ratio": ratio,
         "pdu_connected": False,
         "ip_address": None,
         "ping_success": False,
         "ping_stats": None,
+        "benchmark_stats": None,
         "duration_sec": 0,
         "diagnosis": "None",
     }
@@ -210,9 +235,12 @@ def run_single_scenario(scenario_key: str, timeout: int, ping_count: int, keep_a
 
         # Phase 2: Launch Monolithic UE
         print("\n[Phase 2/4] Launching Monolithic Dual-Path srsUE...")
+        ue_mn_cfg = os.path.join(scen_dir, "ue_mn.conf") if os.path.exists(os.path.join(scen_dir, "ue_mn.conf")) else f"{BASE_DIR}/ue_mn.conf"
+        ue_sn_cfg = os.path.join(scen_dir, "ue_sn.conf") if os.path.exists(os.path.join(scen_dir, "ue_sn.conf")) else f"{BASE_DIR}/ue_sn.conf"
+        sn_env = f"SRSUE_SN_CONFIG={ue_sn_cfg} " if os.path.exists(ue_sn_cfg) else ""
         ue_cmd = (
-            f"tail -f /dev/null | sudo SRSUE_SN_CONFIG={BASE_DIR}/ue_sn.conf "
-            f"{SRSRAN_BIN} {BASE_DIR}/ue_mn.conf > /tmp/run_ue.log 2>&1"
+            f"tail -f /dev/null | sudo PDCP_SPLIT_RATIO={ratio} {sn_env}"
+            f"{SRSRAN_BIN} {ue_mn_cfg} > /tmp/run_ue.log 2>&1"
         )
         subprocess.Popen(ue_cmd, shell=True, stdin=subprocess.DEVNULL)
 
@@ -270,6 +298,33 @@ def run_single_scenario(scenario_key: str, timeout: int, ping_count: int, keep_a
                     }
             else:
                 result["diagnosis"] = "PDU Session established but ICMP ping experienced 100% packet loss to 10.45.0.1"
+
+            # Optional Throughput Benchmark
+            if benchmark and result["ping_success"]:
+                print("[*] Executing 5MB HTTP Bidirectional Throughput Benchmark...")
+                # Ensure server is running
+                import urllib.request
+                try:
+                    urllib.request.urlopen("http://127.0.0.1:8080/api/status", timeout=1)
+                except Exception:
+                    subprocess.Popen(f"python3 {BASE_DIR}/web_server/server.py 8080 > /tmp/web_server.log 2>&1", shell=True)
+                    time.sleep(1.5)
+
+                bench_cmd = (
+                    f"sudo ip netns exec ue_mn python3 {BASE_DIR}/scripts/ue_benchmark_client.py "
+                    f"--server 10.45.0.1 --port 8080 --test file --samples 1 --size-mb 5.0"
+                )
+                b_res = subprocess.run(bench_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+                b_out = b_res.stdout
+                print(b_out.strip() + "\n")
+
+                dl_m = re.search(r"Running File Transfer \(DL:.*?\)\.\.\.\s+([0-9.]+)\s+Mbps", b_out)
+                ul_m = re.search(r"Running File Transfer \(UL:.*?\)\.\.\.\s+([0-9.]+)\s+Mbps", b_out)
+                if dl_m and ul_m:
+                    result["benchmark_stats"] = {
+                        "dl_mbps": float(dl_m.group(1)),
+                        "ul_mbps": float(ul_m.group(1)),
+                    }
         else:
             result["diagnosis"] = diagnose_failure(scenario_name)
             print(f"  [-] FAILED: {result['diagnosis']}\n")
@@ -301,25 +356,28 @@ def main():
             timeout=args.timeout,
             ping_count=args.ping_count,
             keep_alive=args.keep_alive,
+            ratio=args.ratio,
+            benchmark=args.benchmark,
         )
         results.append(res)
         time.sleep(2)
 
     # Print Summary Report
-    print("\n" + "=" * 82)
+    print("\n" + "=" * 94)
     print("                      SIMULATION TEST SUMMARY REPORT")
-    print("=" * 82)
-    fmt = "  {:<25} | {:<12} | {:<12} | {:<14} | {:<10}"
-    print(fmt.format("Scenario", "PDU Session", "Ping Test", "Avg RTT", "Notes"))
-    print("  " + "-" * 78)
+    print("=" * 94)
+    fmt = "  {:<24} | {:<7} | {:<11} | {:<10} | {:<10} | {:<10} | {:<8}"
+    print(fmt.format("Scenario", "Ratio", "PDU Session", "DL Throughput", "UL Throughput", "Avg RTT", "Status"))
+    print("  " + "-" * 90)
 
     for r in results:
         pdu_str = "CONNECTED" if r["pdu_connected"] else "FAILED"
-        ping_str = "PASSED" if r["ping_success"] else ("FAILED" if r["pdu_connected"] else "N/A")
-        rtt_str = f"{r['ping_stats']['avg_ms']:.2f} ms" if r["ping_stats"] else "N/A"
-        notes = "OK" if r["ping_success"] else r["diagnosis"][:18] + "..."
-        print(fmt.format(r["scenario"], pdu_str, ping_str, rtt_str, notes))
-    print("=" * 82 + "\n")
+        dl_str = f"{r['benchmark_stats']['dl_mbps']:.2f} Mbps" if r.get("benchmark_stats") else "--"
+        ul_str = f"{r['benchmark_stats']['ul_mbps']:.2f} Mbps" if r.get("benchmark_stats") else "--"
+        rtt_str = f"{r['ping_stats']['avg_ms']:.2f} ms" if r.get("ping_stats") else "N/A"
+        status_str = "PASS" if r["ping_success"] else "FAIL"
+        print(fmt.format(r["scenario"], r["ratio"], pdu_str, dl_str, ul_str, rtt_str, status_str))
+    print("=" * 94 + "\n")
 
 
 if __name__ == "__main__":

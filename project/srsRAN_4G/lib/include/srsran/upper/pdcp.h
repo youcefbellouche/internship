@@ -35,22 +35,44 @@ namespace srsran {
 
 class rlc_split_bridge : public srsue::rlc_interface_pdcp
 {
-private:
   bool parsed = false;
   uint32_t ratio_mn = 1;
   uint32_t ratio_sn = 1;
   uint32_t total_ratio = 2;
+  bool duplication_mode = false;
+
+  void apply_ratio_str(const char* str)
+  {
+    if (!str) return;
+    std::string s(str);
+    while (!s.empty() && (s.back() == '\n' || s.back() == '\r' || s.back() == ' ')) s.pop_back();
+
+    if (s == "dup" || s == "duplicate" || s == "duplication" || s.find("dup") != std::string::npos) {
+      duplication_mode = true;
+      ratio_mn = 1;
+      ratio_sn = 1;
+      total_ratio = 2;
+      printf("\n[PDCP Dynamic Switch] Live mode: Packet Duplication ENABLED (URLLC zero-loss dual transmission)\n");
+      fflush(stdout);
+      return;
+    }
+
+    int mn = 1, sn = 1;
+    if (sscanf(s.c_str(), "%d:%d", &mn, &sn) == 2 && mn >= 0 && sn >= 0 && (mn + sn) > 0) {
+      ratio_mn = mn;
+      ratio_sn = sn;
+      total_ratio = mn + sn;
+      duplication_mode = false;
+      printf("\n[PDCP Dynamic Switch] Live mode: Traffic Splitting: MN(DU1)=%d, SN(DU2)=%d (Ratio %d:%d)\n", mn, sn, mn, sn);
+      fflush(stdout);
+    }
+  }
 
   void parse_ratio()
   {
     char* env_ratio = std::getenv("PDCP_SPLIT_RATIO");
     if (env_ratio) {
-      int mn = 1, sn = 1;
-      if (sscanf(env_ratio, "%d:%d", &mn, &sn) == 2 && mn >= 0 && sn >= 0 && (mn + sn) > 0) {
-        ratio_mn = mn;
-        ratio_sn = sn;
-        total_ratio = mn + sn;
-      }
+      apply_ratio_str(env_ratio);
     }
     parsed = true;
   }
@@ -59,17 +81,13 @@ private:
   {
     FILE* fp = fopen("/tmp/pdcp_split_ratio", "r");
     if (fp) {
-      char buf[32];
+      char buf[64];
       if (fgets(buf, sizeof(buf), fp)) {
-        int mn = 1, sn = 1;
-        if (sscanf(buf, "%d:%d", &mn, &sn) == 2 && mn >= 0 && sn >= 0 && (mn + sn) > 0) {
-          if ((uint32_t)mn != ratio_mn || (uint32_t)sn != ratio_sn) {
-            ratio_mn = mn;
-            ratio_sn = sn;
-            total_ratio = mn + sn;
-            printf("\n[PDCP Dynamic Switch] Live traffic redirection: MN(DU1)=%d, SN(DU2)=%d (Ratio %d:%d)\n", mn, sn, mn, sn);
-            fflush(stdout);
-          }
+        static std::string last_buf = "";
+        std::string cur(buf);
+        if (cur != last_buf) {
+          last_buf = cur;
+          apply_ratio_str(buf);
         }
       }
       fclose(fp);
@@ -100,7 +118,7 @@ public:
     bool sn_full = sn_rlc ? sn_rlc->sdu_queue_is_full(lcid) : true;
 
     // Policy / Hot-Switch Case 1: Pure Satellite Mode (0:1)
-    if (ratio_mn == 0 && ratio_sn > 0) {
+    if (!duplication_mode && ratio_mn == 0 && ratio_sn > 0) {
       if (sn_rlc && !sn_full) {
         sn_rlc->write_sdu(lcid, std::move(sdu));
       } else if (mn_rlc && !mn_full) {
@@ -110,7 +128,7 @@ public:
     }
 
     // Policy / Hot-Switch Case 2: Pure Terrestrial Mode (1:0)
-    if (ratio_sn == 0 && ratio_mn > 0) {
+    if (!duplication_mode && ratio_sn == 0 && ratio_mn > 0) {
       if (mn_rlc && !mn_full) {
         mn_rlc->write_sdu(lcid, std::move(sdu));
       } else if (sn_rlc && !sn_full) {
@@ -119,25 +137,41 @@ public:
       return;
     }
 
-    // Case 3: Concurrent Dual-DU Multi-Connectivity (e.g. 1:1, 2:7, or M:N ratio)
-    // Both DUs operate simultaneously. To achieve 0% packet loss and eliminate the
-    // 220ms 3GPP t_reordering stall, packets are transmitted via 3GPP Rel-15/16 PDCP Duplication:
-    // SDU is actively pushed to sn_rlc (DU2 over RF port 3001) while guaranteed via mn_rlc (DU1).
-    uint32_t count = packet_counter++ % total_ratio;
-    bool route_to_sn = (count >= ratio_mn);
-
-    if (route_to_sn && sn_rlc && !sn_full) {
-      srsran::unique_byte_buffer_t sdu_copy = srsran::make_byte_buffer();
-      if (sdu_copy && sdu) {
-        *sdu_copy = *sdu;
-        sn_rlc->write_sdu(lcid, std::move(sdu_copy));
+    // Case 3A: Packet Duplication Mode (3GPP Rel-15/16 URLLC)
+    // Send identical copy of SDU to both MN and SN simultaneously
+    if (duplication_mode) {
+      if (sn_rlc && !sn_full) {
+        srsran::unique_byte_buffer_t sdu_copy = srsran::make_byte_buffer();
+        if (sdu_copy && sdu) {
+          *sdu_copy = *sdu;
+          sn_rlc->write_sdu(lcid, std::move(sdu_copy));
+        }
       }
+      if (mn_rlc && !mn_full) {
+        mn_rlc->write_sdu(lcid, std::move(sdu));
+      } else if (sn_rlc && !sn_full) {
+        mn_rlc->write_sdu(lcid, std::move(sdu));
+      }
+      return;
     }
 
-    if (mn_rlc && !mn_full) {
-      mn_rlc->write_sdu(lcid, std::move(sdu));
-    } else if (sn_rlc && !sn_full) {
-      sn_rlc->write_sdu(lcid, std::move(sdu));
+    // Case 3B: Traffic Splitting Mode (Split Bearer, e.g. 1:1 alternating)
+    // Alternate packets according to configured ratio
+    uint32_t count = packet_counter++ % total_ratio;
+    bool route_to_mn = (count < ratio_mn);
+
+    if (route_to_mn) {
+      if (mn_rlc && !mn_full) {
+        mn_rlc->write_sdu(lcid, std::move(sdu));
+      } else if (sn_rlc && !sn_full) {
+        sn_rlc->write_sdu(lcid, std::move(sdu));
+      }
+    } else {
+      if (sn_rlc && !sn_full) {
+        sn_rlc->write_sdu(lcid, std::move(sdu));
+      } else if (mn_rlc && !mn_full) {
+        mn_rlc->write_sdu(lcid, std::move(sdu));
+      }
     }
   }
 

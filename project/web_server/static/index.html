@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5G Space-Terrestrial MR-DC Telemetry & Benchmarking Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+    <div class="app-container">
+        <!-- Top Navigation Bar -->
+        <header class="navbar">
+            <div class="brand">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">5G MR-DC Space-Terrestrial Benchmarking</span>
+                    <span class="brand-subtitle">PDCP Split Bearer & Cross-Layer Telemetry</span>
+                </div>
+            </div>
+
+            <div class="nav-status">
+                <div class="status-badge" id="server-status-badge">
+                    <span class="status-dot green"></span>
+                    <span class="status-label">Server: Online (0.0.0.0:8080)</span>
+                </div>
+                <div class="status-badge" id="ue-status-badge">
+                    <span class="status-dot pulse-blue"></span>
+                    <span class="status-label" id="ue-ip-label">UE Gateway: 10.45.0.1</span>
+                </div>
+                <div class="status-badge mode-badge" id="mode-badge">
+                    <span class="badge-text" id="active-mode-text">Ratio 1:1 (Multi-Connectivity)</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <main class="dashboard-grid">
+            
+            <!-- Quick Control & Mode Switcher Card -->
+            <section class="card control-card">
+                <div class="card-header">
+                    <h3>Multi-Connectivity Runtime Controls</h3>
+                    <span class="badge info">Dynamic Hot-Switching</span>
+                </div>
+                <div class="card-body">
+                    <div class="control-row">
+                        <label class="control-label">PDCP Split Policy:</label>
+                        <div class="button-group">
+                            <button class="btn btn-secondary" onclick="setRatio('1:0')">
+                                <span class="btn-icon">&#128225;</span> Single: Pure TN (1:0)
+                            </button>
+                            <button class="btn btn-primary active" onclick="setRatio('1:1')">
+                                <span class="btn-icon">&#9889;</span> Multi: Split/Dup (1:1)
+                            </button>
+                            <button class="btn btn-secondary" onclick="setRatio('0:1')">
+                                <span class="btn-icon">&#128752;</span> Single: Pure NTN (0:1)
+                            </button>
+                            <button class="btn btn-secondary" onclick="setRatio('2:7')">
+                                <span class="btn-icon">&#128398;</span> Asymmetric (2:7)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="control-row action-row">
+                        <label class="control-label">Live Benchmark Triggers:</label>
+                        <div class="button-group">
+                            <button class="btn btn-action" id="btn-run-file" onclick="triggerClientTest('file')">
+                                <span>&#128196;</span> Run File Transfer (10MB)
+                            </button>
+                            <button class="btn btn-action" id="btn-run-stream" onclick="triggerClientTest('stream')">
+                                <span>&#128249;</span> Run Data Stream (15s)
+                            </button>
+                            <button class="btn btn-accent" id="btn-run-batch" onclick="triggerBatchBenchmark()">
+                                <span>&#9654;</span> Run Full 10-Sample Benchmark
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Key Performance Metrics (Cards) -->
+            <div class="kpi-grid">
+                <!-- DL Throughput -->
+                <div class="kpi-card">
+                    <div class="kpi-title">Average Downlink Throughput</div>
+                    <div class="kpi-value-row">
+                        <span class="kpi-number" id="kpi-dl-thr">--</span>
+                        <span class="kpi-unit">Mbps</span>
+                    </div>
+                    <div class="kpi-footer">
+                        <span class="kpi-tag" id="kpi-dl-tag">DL (Server &rarr; UE)</span>
+                        <span class="kpi-change positive" id="kpi-dl-status">Ready</span>
+                    </div>
+                </div>
+
+                <!-- UL Throughput -->
+                <div class="kpi-card">
+                    <div class="kpi-title">Average Uplink Throughput</div>
+                    <div class="kpi-value-row">
+                        <span class="kpi-number" id="kpi-ul-thr">--</span>
+                        <span class="kpi-unit">Mbps</span>
+                    </div>
+                    <div class="kpi-footer">
+                        <span class="kpi-tag" id="kpi-ul-tag">UL (UE &rarr; Server)</span>
+                        <span class="kpi-change neutral" id="kpi-ul-status">Ready</span>
+                    </div>
+                </div>
+
+                <!-- One-Way Latency -->
+                <div class="kpi-card">
+                    <div class="kpi-title">One-Way Latency & Jitter</div>
+                    <div class="kpi-value-row">
+                        <span class="kpi-number" id="kpi-owl">--</span>
+                        <span class="kpi-unit">ms</span>
+                    </div>
+                    <div class="kpi-footer">
+                        <span class="kpi-tag" id="kpi-jitter">Jitter: -- ms</span>
+                        <span class="kpi-tag">Kernel Sync</span>
+                    </div>
+                </div>
+
+                <!-- Reliability & Retransmissions -->
+                <div class="kpi-card">
+                    <div class="kpi-title">TCP Retransmission & Loss</div>
+                    <div class="kpi-value-row">
+                        <span class="kpi-number text-emerald" id="kpi-retrans">0.0</span>
+                        <span class="kpi-unit">%</span>
+                    </div>
+                    <div class="kpi-footer">
+                        <span class="kpi-tag" id="kpi-loss">Loss: 0.0%</span>
+                        <span class="kpi-change positive">0% Stall (15ms timer)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-time Chart Section -->
+            <section class="card chart-card">
+                <div class="card-header">
+                    <div class="header-left">
+                        <h3>Instantaneous Throughput & Delay Time Series</h3>
+                        <span class="badge live">Live Sampling</span>
+                    </div>
+                    <div class="chart-legend">
+                        <span class="legend-item"><span class="legend-box blue"></span> DL Throughput</span>
+                        <span class="legend-item"><span class="legend-box green"></span> UL Throughput</span>
+                        <span class="legend-item"><span class="legend-box amber"></span> Latency (ms)</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-wrapper">
+                        <canvas id="throughputChart" width="900" height="280"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Statistical Error Bar Chart Section (Average with Min/Max Whiskers) -->
+            <section class="card error-bar-card" id="error-bar-section">
+                <div class="card-header">
+                    <div class="header-left">
+                        <h3>10-Sample Benchmark Distribution (Average &amp; Min&ndash;Max Error Bars)</h3>
+                        <span class="badge info">Statistical Comparison</span>
+                    </div>
+                    <div class="chart-controls">
+                        <!-- Metric Selector -->
+                        <div class="control-select-group">
+                            <label for="metric-select">Metric:</label>
+                            <select id="metric-select" class="form-select" onchange="renderErrorBarChart()">
+                                <option value="dl_throughput_mbps" selected>Downlink Throughput (Mbps)</option>
+                                <option value="ul_throughput_mbps">Uplink Throughput (Mbps)</option>
+                                <option value="one_way_latency_ms">End-to-End One-Way Latency (ms)</option>
+                                <option value="dl_one_way_latency_ms">DL One-Way Latency (ms)</option>
+                                <option value="ul_one_way_latency_ms">UL One-Way Latency (ms)</option>
+                                <option value="jitter_ms">Experienced Jitter (ms)</option>
+                                <option value="ran_cpu">RAN CPU Utilization (%)</option>
+                            </select>
+                        </div>
+
+                        <!-- Workload Selector -->
+                        <div class="control-select-group">
+                            <label for="workload-select">Workload:</label>
+                            <select id="workload-select" class="form-select" onchange="renderErrorBarChart()">
+                                <option value="file_transfer" selected>Standard File Transfer (1 MB)</option>
+                                <option value="data_stream">Continuous Data Stream (3s)</option>
+                                <option value="comparison">Both (File Transfer vs Stream)</option>
+                            </select>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <button class="btn btn-xs btn-primary" onclick="loadBenchmarkSummaryAndRender()">
+                            <span>&#8635;</span> Refresh Data
+                        </button>
+                        <button class="btn btn-xs btn-secondary" onclick="exportErrorBarChartPNG()">
+                            <span>&#128190;</span> Save PNG
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="error-bar-chart-container">
+                        <canvas id="errorBarCanvas" width="920" height="340"></canvas>
+                    </div>
+
+                    <!-- Metric Breakdown Pills (Mean, Min, Max, Std Dev) -->
+                    <div class="stats-pills-grid" id="stats-pills-container">
+                        <!-- Dynamically populated by dashboard.js -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- RAN Resource Profiler Section -->
+            <section class="card ran-resources-card">
+                <div class="card-header">
+                    <h3>RAN Protocol Stack Resource Consumption</h3>
+                    <span class="badge neutral" id="ran-profile-mode">Single vs Multi Profile</span>
+                </div>
+                <div class="card-body">
+                    <div class="resources-grid">
+                        <div class="resource-item">
+                            <div class="resource-label">
+                                <span>srsUE (User Equipment)</span>
+                                <span class="resource-pct" id="cpu-ue">--%</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill fill-blue" id="bar-ue" style="width: 0%"></div>
+                            </div>
+                            <span class="resource-note">MCG + SCG + PDCP Coordinator</span>
+                        </div>
+
+                        <div class="resource-item">
+                            <div class="resource-label">
+                                <span>O-CU-UP (User Plane)</span>
+                                <span class="resource-pct" id="cpu-cuup">--%</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill fill-green" id="bar-cuup" style="width: 0%"></div>
+                            </div>
+                            <span class="resource-note">GTP-U / N3 / F1-U Splitting</span>
+                        </div>
+
+                        <div class="resource-item">
+                            <div class="resource-label">
+                                <span>DU1 (Terrestrial Cell)</span>
+                                <span class="resource-pct" id="cpu-du1">--%</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill fill-cyan" id="bar-du1" style="width: 0%"></div>
+                            </div>
+                            <span class="resource-note">High-PHY & MAC Scheduler (TN)</span>
+                        </div>
+
+                        <div class="resource-item">
+                            <div class="resource-label">
+                                <span>DU2 (Satellite Cell)</span>
+                                <span class="resource-pct" id="cpu-du2">--%</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill fill-amber" id="bar-du2" style="width: 0%"></div>
+                            </div>
+                            <span class="resource-note">High-PHY & MAC Scheduler (NTN)</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Historical Benchmark Results Table -->
+            <section class="card history-card">
+                <div class="card-header">
+                    <h3>10-Sample Benchmark Results Matrix</h3>
+                    <div class="table-actions">
+                        <button class="btn btn-xs" onclick="exportResultsCSV()">Export CSV</button>
+                        <button class="btn btn-xs" onclick="clearResults()">Reset</button>
+                    </div>
+                </div>
+                <div class="card-body no-padding">
+                    <div class="table-responsive">
+                        <table class="data-table" id="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Sample #</th>
+                                    <th>Workload</th>
+                                    <th>Connectivity Mode</th>
+                                    <th>DL Thr (Mbps)</th>
+                                    <th>UL Thr (Mbps)</th>
+                                    <th>One-Way Latency</th>
+                                    <th>Jitter</th>
+                                    <th>TCP Retrans</th>
+                                    <th>RAN CPU</th>
+                                </tr>
+                            </thead>
+                            <tbody id="results-tbody">
+                                <tr class="empty-row">
+                                    <td colspan="9">No benchmark samples collected yet. Click "Run Full 10-Sample Benchmark" or trigger tests above.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+# MR-DC Scenario: Ground CU-UP Configuration
+cu_up:
+  plmn_list:
+  - '99970'
+  e1ap:
+    gateways:
+    - bind_addrs: 127.0.20.2
+      addrs: 127.0.20.1
+  ngu:
+    socket:
+    - bind_addr: 127.0.0.1
+  f1u:
+    socket:
+    - bind_addr: 127.0.10.1
+log:
+  filename: /tmp/mrdc_tn_ntn_20mhz_cu_up.log
+  all_level: debug

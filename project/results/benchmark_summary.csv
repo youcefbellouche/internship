@@ -1,0 +1,6 @@
+Configuration,Workload,DL_Thr_Mean_Mbps,UL_Thr_Mean_Mbps,DL_OWL_Mean_ms,UL_OWL_Mean_ms,Jitter_Mean_ms,Retrans_Pct,Packet_Loss_Pct,RAN_CPU_Avg_Pct
+Single-Connectivity TN (1:0),File Transfer,50.80,33.66,19.65,47.94,1.48,0.0,0.0,59.26
+Single-Connectivity NTN (0:1),File Transfer,35.20,18.50,32.40,64.10,2.15,0.0,0.0,57.80
+Multi-Connectivity Split (1:1),File Transfer,42.50,31.20,58.20,78.70,8.20,0.0,0.0,52.98
+Multi-Connectivity Dup (dup),File Transfer,48.60,32.80,21.45,46.80,1.85,0.0,0.0,54.60
+
