@@ -22,17 +22,32 @@ struct drb_context {
 
   void stop()
   {
-    pdcp->stop();
-    f1u->stop();
-    f1u_gw_bearer->stop();
+    if (pdcp != nullptr) {
+      pdcp->stop();
+    }
+    if (f1u != nullptr) {
+      f1u->stop();
+    }
+    if (f1u_sn != nullptr) {
+      f1u_sn->stop();
+    }
+    if (f1u_gw_bearer != nullptr) {
+      f1u_gw_bearer->stop();
+    }
+    if (f1u_gw_bearer_sn != nullptr) {
+      f1u_gw_bearer_sn->stop();
+    }
   }
 
   drb_id_t    drb_id;
   gtpu_teid_t f1u_ul_teid;
+  gtpu_teid_t f1u_ul_teid_sn{};
   f1u_config  f1u_cfg;
 
   std::unique_ptr<f1u_cu_up_gateway_bearer> f1u_gw_bearer;
   std::unique_ptr<f1u_bearer>               f1u;
+  std::unique_ptr<f1u_cu_up_gateway_bearer> f1u_gw_bearer_sn;
+  std::unique_ptr<f1u_bearer>               f1u_sn;
   std::unique_ptr<pdcp_entity>              pdcp;
 
   // Adapter PDCP->SDAP

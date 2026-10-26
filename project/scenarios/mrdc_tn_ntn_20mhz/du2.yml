@@ -21,6 +21,25 @@ cell_cfg:
   plmn: '99970'
   tac: 1
   pci: 2
+  ntn:
+    cell_specific_koffset: 150
+    ta_common: 0
+    ephemeris_info:
+      pos_x: 20922195
+      pos_y: 1967783
+      pos_z: 19770302
+      vel_x: 0
+      vel_y: 0
+      vel_z: 0
+  sib:
+    si_window_length: 5
+    si_sched_info:
+      - si_period: 16
+        sib_mapping: 19
+  pucch:
+    sr_period_ms: 320
+  csi:
+    csi_rs_period: 80
   pdcch:
     common:
       ss0_index: 0
